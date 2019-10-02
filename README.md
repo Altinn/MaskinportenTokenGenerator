@@ -11,9 +11,8 @@ This is a utilty for helping out with generating access_tokens from Maskinporten
 Open a Visual Studio 2017 or newer commandline environment, and run `msbuild` in the `src`-directory, or open the solution file and build within Visual Studio.
 
 ## Usage
-1. Make sure the Maskinporten public certificates are installed in local machine keystore. The Powershell-script `download_and_install_maskinporten_certs.ps1` can be used for this. 
-2. Set up `config.cmd` and configure the production and/or VER2-settings (optional: copy config.cmd to `config.local.cmd` which is in .gitignore and takes precendence over `config.cmd`)
-3. Run either of the following utility scripts:
+1. Set up `config.cmd` and configure the production and/or VER2-settings (optional: copy config.cmd to `config.local.cmd` which is in .gitignore and takes precendence over `config.cmd`)
+2. Run either of the following utility scripts:
 	* `get_${env}_token` Gets a access_token and places it on the clipboard (for easy pasting in Postman etc)
 	* `start_${env}_token_server` Starts a simple HTTP-server listening on all interfaces on port 17823 by default. Any GET-request to `http://localhost:17823` will attempt to fetch a access_token from Maskinporten and proxy the response.
 
