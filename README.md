@@ -31,5 +31,7 @@ By using the token server, you can add a "Pre-request script" in Postman, with s
 
 Here "BearerToken" is an environment variable, which can be put in the "Token"-field in the "Authorization"-tab when type is set to "Bearer Token".
 
+*If you are testing MaskinportenAPI, see https://github.com/elsand/MaskinportenApiPostman for a pre-configured Postman collection*
+
 ## License
 MIT
