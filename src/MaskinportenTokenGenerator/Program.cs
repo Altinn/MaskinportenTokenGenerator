@@ -16,12 +16,14 @@ namespace MaskinportenTokenGenerator
         private static string _resource;
         private static string _scopes;
         private static string _tokenEndpoint;
+        private static int _tokenTtl = 120;
 
         [STAThread]
         static void Main(string[] args)
         {
             var showHelp = false;
             var serverMode = false;
+            var onlyToken = false;
             int serverPort = 17823;
 
             var p = new OptionSet() {
@@ -33,14 +35,21 @@ namespace MaskinportenTokenGenerator
                     v =>  _audience = v },
                 { "r=|resource=",  "Intended audience, used as aud-claim in returned access_token",
                     v => _resource = v },
+                { "l=|token_ttl=",  "Token lifetime in seconds (default: 120)",
+                    v =>
+                    {
+                        if (v != null && Int32.TryParse(v, out int overriddenTokenTtl))
+                        {
+                            _tokenTtl = overriddenTokenTtl;
+                        }
+                    }
+                },
                 { "s=|scopes=",  "Scopes requested, comma separated",
                     v => _scopes = v.Replace(',', ' ') },
                 { "e=|token_endpoint=",  "Token endpoint to ask for access_token",
                     v => _tokenEndpoint = v },
-                { "h|help",  "show this message and exit",
-                    v => showHelp = v != null },
                 { "m|server_mode",  "Enable server mode",
-                    v => serverMode = v != null },
+                    v => serverMode = v != null  },
                 { "p=|server_port=",  "Server port (default 17823)",
                     v =>
                     {
@@ -50,7 +59,10 @@ namespace MaskinportenTokenGenerator
                         }
                     }
                 },
-
+                { "h|help",  "show this message and exit",
+                    v => showHelp = v != null },
+                { "o|only_token", "Only return token to stdout", 
+                    v => onlyToken = v != null },
             };
 
             try
@@ -73,7 +85,7 @@ namespace MaskinportenTokenGenerator
 
             CheckParameters(p);
 
-            var token = new Token(_certificateThumbPrint, _tokenEndpoint, _audience, _resource, _scopes, _issuer);
+            var token = new Token(_certificateThumbPrint, _tokenEndpoint, _audience, _resource, _scopes, _issuer, _tokenTtl);
 
             if (!serverMode)
             {
@@ -89,6 +101,12 @@ namespace MaskinportenTokenGenerator
                 else
                 {
                     var accessTokenObject = JsonConvert.DeserializeObject<JObject>(accessToken);
+                    if (onlyToken)
+                    {
+                        Console.WriteLine(accessTokenObject.GetValue("access_token"));
+                        Environment.Exit(0);
+                    }
+
                     Clipboard.SetText(accessTokenObject.Property("access_token").Value.ToString());
                     Console.WriteLine("Got successful response:");
                     Console.WriteLine("----------------------------------------");

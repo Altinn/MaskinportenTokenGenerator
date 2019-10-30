@@ -1,4 +1,5 @@
 @echo off
+cd %~dp0
 set MPEXE=%~dp0\src\MaskinportenTokenGenerator\bin\Debug\MaskinportenTokenGenerator.exe
 if not exist %MPEXE% (
 	echo %MPEXE% not found. Build it first.
@@ -6,8 +7,12 @@ if not exist %MPEXE% (
 )
 
 set server_mode=
+set only_token=
 if ["%~1"]==["servermode"] (
 	set server_mode="--server_mode"
+)
+if ["%~1"]==["onlytoken"] (
+	set only_token="--only_token"
 )
 
 if exist config.local.cmd (
@@ -43,4 +48,4 @@ if ["%~3"]==[""] (
 	set scopes=%default_scopes%
 )
 
-%MPEXE% --certificate_thumbprint=%certificate_thumbprint% --client_id=%client_id% --audience=%audience% --resource=%resource% --token_endpoint=%token_endpoint% --scopes=%scopes% %server_mode% --server_port=17823
+%MPEXE% --certificate_thumbprint=%certificate_thumbprint% --client_id=%client_id% --audience=%audience% --resource=%resource% --token_endpoint=%token_endpoint% --scopes=%scopes% %server_mode% --server_port=17823 %only_token%

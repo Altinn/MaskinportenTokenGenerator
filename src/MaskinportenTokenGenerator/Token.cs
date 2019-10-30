@@ -15,9 +15,10 @@ namespace MaskinportenTokenGenerator
         private static string _resource;
         private static string _scopes;
         private static string _tokenEndpoint;
+        private static int _tokenTtl;
 
         public Token(string certificateThumbprint, string tokenEndpoint, string audience, string resource,
-            string scopes, string issuer)
+            string scopes, string issuer, int tokenTtl)
         {
             _certificateThumbPrint = certificateThumbprint;
             _tokenEndpoint = tokenEndpoint;
@@ -25,6 +26,7 @@ namespace MaskinportenTokenGenerator
             _resource = resource;
             _scopes = scopes;
             _issuer = issuer;
+            _tokenTtl = tokenTtl;
         }
 
         public string GetAccessToken(string assertion, out bool isError)
@@ -60,7 +62,7 @@ namespace MaskinportenTokenGenerator
                 { "resource", _resource },
                 { "scope", _scopes },
                 { "iss", _issuer },
-                { "exp", dateTimeOffset.ToUnixTimeSeconds() + 120 },
+                { "exp", dateTimeOffset.ToUnixTimeSeconds() + _tokenTtl },
                 { "iat", dateTimeOffset.ToUnixTimeSeconds() },
                 { "jti", Guid.NewGuid().ToString() },
             };
