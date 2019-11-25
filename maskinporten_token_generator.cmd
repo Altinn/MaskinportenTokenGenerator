@@ -21,20 +21,26 @@ if exist config.local.cmd (
 	call config.cmd
 )
 
-set certificate_thumbprint=%production_certificate_thumbprint%
-set client_id=%production_client_id%
-set resource=%production_resource%
-set default_scopes=%production_scopes%
-set audience=https://oidc.difi.no/idporten-oidc-provider/
-set token_endpoint=https://oidc.difi.no/idporten-oidc-provider/token
+set certificate_thumbprint=%test_certificate_thumbprint%
+set client_id=%test_client_id%
+set resource=%test_resource%
+set default_scopes=%test_scopes%
 
+if ["%~2"]==["test1"] (
+	set audience=https://oidc-test1.difi.eon.no/idporten-oidc-provider/
+	set token_endpoint=https://oidc-test1.difi.eon.no/idporten-oidc-provider/token
+)
 if ["%~2"]==["ver2"] (
-	set certificate_thumbprint=%test_certificate_thumbprint%
-	set client_id=%test_client_id%
-	set resource=%test_resource%
-	set default_scopes=%test_scopes%
 	set audience=https://oidc-ver2.difi.no/idporten-oidc-provider/
 	set token_endpoint=https://oidc-ver2.difi.no/idporten-oidc-provider/token
+)
+if ["%~2"]==["prod"] (
+	set certificate_thumbprint=%production_certificate_thumbprint%
+	set client_id=%production_client_id%
+	set resource=%production_resource%
+	set default_scopes=%production_scopes%
+	set audience=https://oidc.difi.no/idporten-oidc-provider/
+	set token_endpoint=https://oidc.difi.no/idporten-oidc-provider/token
 )
 
 powershell -Command Get-ChildItem Cert:\LocalMachine\My\%certificate_thumbprint% >NUL
