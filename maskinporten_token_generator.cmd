@@ -27,20 +27,20 @@ set resource=%test_resource%
 set default_scopes=%test_scopes%
 
 if ["%~2"]==["test1"] (
-	set audience=https://oidc-test1.difi.eon.no/idporten-oidc-provider/
-	set token_endpoint=https://oidc-test1.difi.eon.no/idporten-oidc-provider/token
+	set audience=https://test1.maskinporten.no/
+	set token_endpoint=https://test1.maskinporten.no/token
 )
 if ["%~2"]==["ver2"] (
-	set audience=https://oidc-ver2.difi.no/idporten-oidc-provider/
-	set token_endpoint=https://oidc-ver2.difi.no/idporten-oidc-provider/token
+	set audience=https://ver2.maskinporten.no/
+	set token_endpoint=https://ver2.maskinporten.no/token
 )
 if ["%~2"]==["prod"] (
 	set certificate_thumbprint=%production_certificate_thumbprint%
 	set client_id=%production_client_id%
 	set resource=%production_resource%
 	set default_scopes=%production_scopes%
-	set audience=https://oidc.difi.no/idporten-oidc-provider/
-	set token_endpoint=https://oidc.difi.no/idporten-oidc-provider/token
+	set audience=https://maskinporten.no/
+	set token_endpoint=https://maskinporten.no/token
 )
 
 powershell -Command Get-ChildItem Cert:\LocalMachine\My\%certificate_thumbprint% >NUL
