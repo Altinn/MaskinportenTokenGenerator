@@ -1,25 +1,53 @@
-rem --------- PRODUCTION SETTINGS -----------
-rem The thumbprint for your own enterprise certificate in local machine storage
-set production_certificate_thumbprint=INSERT_PRODUCTION_THUMBPRINT_HERE
+:: 
+:: Do not alter this file directly, but copy it to config.local.cmd where you can override values defined in this file
+:: 
 
-rem The client_id that you have provisioned with the scopes you want
-set production_client_id=INSERT_PRODUCTION_CLIENT_ID_HERE
+:: --------- PRODUCTION SETTINGS -----------
+:: The thumbprint for your own enterprise certificate in local machine storage
+set production_certificate_thumbprint=
 
-rem The intended "aud" claim for the access_token
-set production_resource=https://www.altinn.no/maskinporten-api/
+:: Alternative to cert thumbprint; the path to a PKCS#12 file containing a certificate used to sign the request
+::set production_keystore_path=
 
-rem The scopes you want in your access token
-set test_scopes="altinn:maskinporten/delegations,altinn:maskinporten/delegationschemes.read,altinn:maskinporten/delegationschemes.write,altinn:maskinporten/delegationschemes.admin"
+:: Password to the key store. Make sure you escape correctly.
+::set production_keystore_password=
 
-rem --------- TEST1/VER2 SETTINGS -----------
-rem The thumbprint for your own enterprise certificate in local machine storage
-set test_certificate_thumbprint=INSERT_TEST_THUMBPRINT_HERE
+:: If authenticating with a pre-registered key, the kid used as identifier must be included in the assertion. If not supplied, falls back to thumbprint (same as x5t).
+::set production_kid=
 
-rem The client_id that you have provisioned with the scopes you want
-set test_client_id=INSERT_TEST_CLIENT_ID_HERE
+:: The client_id that you have provisioned with the scopes you want
+set production_client_id=
 
-rem The intended "aud" claim for the access_token
-set test_resource=https://tt02.altinn.no/maskinporten-api/
+:: The intended "aud" claim for the access_token
+set production_resource=
 
-rem The scopes you want in your access token
-set test_scopes="altinn:maskinporten/delegations,altinn:maskinporten/delegationschemes.read,altinn:maskinporten/delegationschemes.write,altinn:maskinporten/delegationschemes.admin"
+:: The scopes you want in your access token (comma delimited, no spaces)
+set production_scopes=
+
+:: The aud claim for the bearer grant assertion. Used as issuer claim in returned token
+set production_audience=https://maskinporten.no/
+
+:: Endpoint to send bearer grant assertion
+set production_token_endpoint=https://maskinporten.no/token
+
+:: --------- VER2 (for ATxx/TT02) SETTINGS -----------
+set test_certificate_thumbprint=
+::set test_keystore_path=
+::set test_keystore_password=
+::set test_kid=
+set test_client_id=
+set test_resource=
+set test_scopes=
+set test_audience=https://ver2.maskinporten.no/
+set test_token_endpoint=https://ver2.maskinporten.no/token
+
+:: --------- TEST1 (for DEV) SETTINGS -----------
+set dev_certificate_thumbprint=
+::set dev_keystore_path=
+::set dev_keystore_password=
+::set dev_kid=
+set dev_client_id=
+set dev_resource=
+set dev_scopes=
+set dev_audience=https://test1.maskinporten.no/
+set dev_token_endpoint=https://test1.maskinporten.no/token

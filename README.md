@@ -1,25 +1,32 @@
 # MaskinportenTokenGenerator
 
-This is a utilty for helping out with generating access_tokens from Maskinporten, supporting integration with Postman for automating retrieval of access_tokens via a local web server.
+This is a utilty for helping out with generating access_tokens from ID/Maskinporten, supporting integration with Postman for automating retrieval of access_tokens via a local web server.
 
 ## Requirements
 * A recent Windows and Visual Studio 2017 or newer for building
-* A enterprise certificate owned installed owned by the organization that has been given access to one or more scopes in machineporten
+* Either
+	* A enterprise certificate owned installed owned by the organization that has been given access to one or more scopes in machineporten
+	* A password-protected PKCS#12 file containing the public/private key pair. Used if the client has been configured with a pre-configured key.
 * A client id for an integration in Maskinporten provisioned with one or more scopes
 
 ## Building
 Open a Visual Studio 2017 or newer commandline environment, and run `msbuild` in the `src`-directory, or open the solution file and build within Visual Studio.
 
 ## Usage
-1. Set up `config.cmd` and configure the production and/or VER2-settings (optional: copy config.cmd to `config.local.cmd` which is in .gitignore and takes precendence over `config.cmd`)
+1. Copy `config.cmd` to `config.local.cmd` and configure the production and/or VER2-settings 
 2. Run either of the following utility scripts:
 	* `get_${env}_token` Gets a access_token and places it on the clipboard (for easy pasting in Postman etc)
 	* `start_${env}_token_server` Starts a simple HTTP-server listening on all interfaces on port 17823 by default. Any GET-request to `http://localhost:17823` will attempt to fetch a access_token from Maskinporten and proxy the response.
 
+You can keep multiple configuration files for various settings, and can pass those as a single parameter to the scripts, like `start_ver2_token_server config.local.my-custom-config.cmd` 
+
+This can also be done by dragging and dropping the custom config-file over the script you want to run.
+
 ## Postman integration
 By using the token server, you can add a "Pre-request script" in Postman, with somelike the following:
 
-    pm.sendRequest("http://localhost:17823/", function (err, response) {
+    /* Adding "?cache=true" returns the same token as long as it is valid (ie. does not request a new token from Maskinporten) */
+    pm.sendRequest("http://localhost:17823/?cache=true", function (err, response) {
 	    var json = response.json();
 	    if (typeof json.access_token !== "undefined") {
 	        pm.environment.set("BearerToken", json.access_token);
@@ -32,6 +39,7 @@ By using the token server, you can add a "Pre-request script" in Postman, with s
 Here "BearerToken" is an environment variable, which can be put in the "Token"-field in the "Authorization"-tab when type is set to "Bearer Token".
 
 *If you are testing MaskinportenAPI, see https://github.com/Altinn/MaskinportenApiPostman for a pre-configured Postman collection*
+
 
 ## License
 MIT

@@ -1,2 +1,6 @@
 @echo off
-call %~dp0\maskinporten_token_generator.cmd single prod
+if not ["%~1"]==[""] (
+    call %~dp0\maskinporten_token_generator.cmd single prod "%~1"
+) else (
+    call %~dp0\maskinporten_token_generator.cmd single prod
+)

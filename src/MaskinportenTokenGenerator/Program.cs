@@ -11,9 +11,12 @@ namespace MaskinportenTokenGenerator
     internal class Program
     {
         private static string _certificateThumbPrint;
+        private static string _p12KeyStoreFile;
+        private static string _p12KeyStorePassword;
+        private static string _kidClaim;
         private static string _issuer;
         private static string _audience;
-        private static string _resource;
+        private static string _resource = null;
         private static string _scopes;
         private static string _tokenEndpoint;
         private static int _tokenTtl = 120;
@@ -24,11 +27,18 @@ namespace MaskinportenTokenGenerator
             var showHelp = false;
             var serverMode = false;
             var onlyToken = false;
+            var onlyGrant = false;
             int serverPort = 17823;
 
             var p = new OptionSet() {
                 { "t=|certificate_thumbprint=", "Thumbprint for certificate to use, see Cert:\\LocalMachine\\My in Powershell.",
                     v => _certificateThumbPrint = v },
+                { "k=|keystore_path=", "Path to PKCS12 file containing certificate to use.",
+                    v => _p12KeyStoreFile = v },
+                { "p=|keystore_password=", "Path to PKCS12 file containing certificate to use.",
+                    v => _p12KeyStorePassword = v },
+                { "K=|kid=", "Set kid-claim in bearer grant assertion header. Used for pre-registered JWK clients.",
+                    v => _kidClaim = v },
                 { "c=|client_id=", "This is the client_id to which the access_token is requested",
                     v => _issuer = v },
                 { "a=|audience=", "The audience for the grant, must be ID-porten",
@@ -50,7 +60,7 @@ namespace MaskinportenTokenGenerator
                     v => _tokenEndpoint = v },
                 { "m|server_mode",  "Enable server mode",
                     v => serverMode = v != null  },
-                { "p=|server_port=",  "Server port (default 17823)",
+                { "P=|server_port=",  "Server port (default 17823)",
                     v =>
                     {
                         if (v != null && UInt16.TryParse(v, out ushort overriddenServerPort))
@@ -59,10 +69,13 @@ namespace MaskinportenTokenGenerator
                         }
                     }
                 },
-                { "h|help",  "show this message and exit",
-                    v => showHelp = v != null },
                 { "o|only_token", "Only return token to stdout", 
                     v => onlyToken = v != null },
+                { "g|only_grant", "Only return bearer grant to stdout", 
+                    v => onlyGrant = v != null },
+                { "h|help",  "show this message and exit",
+                    v => showHelp = v != null },
+
             };
 
             try
@@ -84,19 +97,44 @@ namespace MaskinportenTokenGenerator
             }
 
             CheckParameters(p);
-
-            var token = new Token(_certificateThumbPrint, _tokenEndpoint, _audience, _resource, _scopes, _issuer, _tokenTtl);
+            
+            Token token;
+            try {
+                if (_certificateThumbPrint != null) {
+                    token = new Token(_certificateThumbPrint, _kidClaim, _tokenEndpoint, _audience, _resource, _scopes, _issuer, _tokenTtl);
+                }
+                else
+                {
+                    token = new Token(_p12KeyStoreFile, _p12KeyStorePassword, _kidClaim, _tokenEndpoint, _audience, _resource, _scopes, _issuer, _tokenTtl);
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("Caught exception " + e.GetType().FullName + ": " + e.Message);
+                Console.WriteLine();
+                Console.WriteLine("Press ENTER to exit.");
+                Console.ReadLine();
+                Environment.Exit(1);
+                return; // To please code inspector complaining about token being undefined below
+            }
 
             if (!serverMode)
             {
                 var assertion = token.GetJwtAssertion();
-                var accessToken = token.GetAccessToken(assertion, out bool isError);
+                if (onlyGrant)
+                {
+                    Console.WriteLine(assertion);
+                    Environment.Exit(0);
+                }
+
+                var accessToken = token.GetAccessToken(assertion, out bool isError, out string curlDebugCommand);
 
                 if (isError)
                 {
                     Console.WriteLine("Failed getting token: " + accessToken);
-                    Console.WriteLine("Assertion used:");
-                    Console.WriteLine(assertion);
+                    Console.WriteLine("Call made (formatted as curl command, also placed in clipboard):");
+                    Console.WriteLine(curlDebugCommand);
+                    Clipboard.SetText(curlDebugCommand);
                 }
                 else
                 {
@@ -152,9 +190,9 @@ namespace MaskinportenTokenGenerator
         {
             var hasErrors = false;
 
-            if (_certificateThumbPrint == null)
+            if (_certificateThumbPrint == null && _p12KeyStoreFile == null || _certificateThumbPrint != null && _p12KeyStoreFile != null)
             {
-                Console.WriteLine("Requires --certificate_thumbprint");
+                Console.WriteLine("Requires either --certificate_thumbprint or --keystore_path");
                 hasErrors = true;
             }
 
@@ -167,12 +205,6 @@ namespace MaskinportenTokenGenerator
             if (_audience == null)
             {
                 Console.WriteLine("Requires --audience");
-                hasErrors = true;
-            }
-
-            if (_resource == null)
-            {
-                Console.WriteLine("Requires --resource");
                 hasErrors = true;
             }
 
