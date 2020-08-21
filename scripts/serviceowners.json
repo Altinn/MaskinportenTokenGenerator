@@ -1,0 +1,18 @@
+{
+    "orgs": {
+        "digdir": {
+            "name": {
+                "en": "Norwegian Digitalisation Agency",
+                "nb": "Digitaliseringsdirektoratet",
+                "nn": "Digitaliseringsdirektoratet"
+            },
+            "orgnr": "991825827",
+            "environments": [
+                "test1",
+                "ver1",
+                "ver2",
+                "prod"
+            ]
+        }
+    }
+}

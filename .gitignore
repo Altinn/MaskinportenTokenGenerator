@@ -1,8 +1,8 @@
 
-# Created by https://www.gitignore.io/api/visualstudio
-# Edit at https://www.gitignore.io/?templates=visualstudio
+# Project specific
 
 config.local*
+scripts/serviceowner.local.json
 
 ### VisualStudio ###
 ## Ignore Visual Studio temporary files, build results, and
