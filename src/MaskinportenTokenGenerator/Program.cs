@@ -112,8 +112,10 @@ namespace MaskinportenTokenGenerator
             {
                 Console.WriteLine("Caught exception " + e.GetType().FullName + ": " + e.Message);
                 Console.WriteLine();
-                Console.WriteLine("Press ENTER to exit.");
-                Console.ReadLine();
+                if (!onlyToken) {
+                    Console.WriteLine("Press ENTER to exit.");
+                    Console.ReadLine();
+                }
                 Environment.Exit(1);
                 return; // To please code inspector complaining about token being undefined below
             }
@@ -153,8 +155,10 @@ namespace MaskinportenTokenGenerator
                     Console.WriteLine("Access token has been copied to clipboard.");
                 }
 
-                Console.WriteLine("Press ENTER to exit.");
-                Console.ReadLine();
+                if (!onlyToken) {
+                    Console.WriteLine("Press ENTER to exit.");
+                    Console.ReadLine();
+                }
                 Environment.Exit(isError ? 1 : 0);
             }
 
