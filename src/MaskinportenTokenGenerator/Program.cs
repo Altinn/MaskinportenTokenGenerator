@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Net;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Mono.Options;
@@ -19,6 +20,7 @@ namespace MaskinportenTokenGenerator
         private static string _resource = null;
         private static string _scopes;
         private static string _tokenEndpoint;
+        private static string _authorizeEndpoint;
         private static int _tokenTtl = 120;
 
         [STAThread]
@@ -29,6 +31,7 @@ namespace MaskinportenTokenGenerator
             var onlyToken = false;
             var onlyGrant = false;
             int serverPort = 17823;
+            bool personMode = false;
 
             var p = new OptionSet() {
                 { "t=|certificate_thumbprint=", "Thumbprint for certificate to use, see Cert:\\LocalMachine\\My in Powershell.",
@@ -58,6 +61,8 @@ namespace MaskinportenTokenGenerator
                     v => _scopes = v.Replace(',', ' ') },
                 { "e=|token_endpoint=",  "Token endpoint to ask for access_token",
                     v => _tokenEndpoint = v },
+                { "A=|authorize_endpoint=",  "Authorize endpoint to redirect user for consent",
+                    v => _authorizeEndpoint = v },
                 { "m|server_mode",  "Enable server mode",
                     v => serverMode = v != null  },
                 { "P=|server_port=",  "Server port (default 17823)",
@@ -69,6 +74,8 @@ namespace MaskinportenTokenGenerator
                         }
                     }
                 },
+                { "i|person_mode=",  "Enable person mode (ID-porten)",
+                    v => personMode = v != null && v == "true" },
                 { "o|only_token", "Only return token to stdout", 
                     v => onlyToken = v != null },
                 { "g|only_grant", "Only return bearer grant to stdout", 
@@ -98,14 +105,14 @@ namespace MaskinportenTokenGenerator
 
             CheckParameters(p);
             
-            Token token;
+            TokenHandler tokenHandler;
             try {
                 if (_certificateThumbPrint != null) {
-                    token = new Token(_certificateThumbPrint, _kidClaim, _tokenEndpoint, _audience, _resource, _scopes, _issuer, _tokenTtl);
+                    tokenHandler = new TokenHandler(_certificateThumbPrint, _kidClaim, _tokenEndpoint, _audience, _resource, _scopes, _issuer, _tokenTtl);
                 }
                 else
                 {
-                    token = new Token(_p12KeyStoreFile, _p12KeyStorePassword, _kidClaim, _tokenEndpoint, _audience, _resource, _scopes, _issuer, _tokenTtl);
+                    tokenHandler = new TokenHandler(_p12KeyStoreFile, _p12KeyStorePassword, _kidClaim, _tokenEndpoint, _audience, _resource, _scopes, _issuer, _tokenTtl);
                 }
             }
             catch (Exception e)
@@ -120,37 +127,37 @@ namespace MaskinportenTokenGenerator
                 return; // To please code inspector complaining about token being undefined below
             }
 
-            if (!serverMode)
+            if (!serverMode && !personMode)
             {
-                var assertion = token.GetJwtAssertion();
+                var assertion = tokenHandler.GetJwtAssertion();
                 if (onlyGrant)
                 {
                     Console.WriteLine(assertion);
                     Environment.Exit(0);
                 }
 
-                var accessToken = token.GetAccessToken(assertion, out bool isError, out string curlDebugCommand);
+                var token = tokenHandler.GetTokenFromJwtBearerGrant(assertion, out bool isError);
 
                 if (isError)
                 {
-                    Console.WriteLine("Failed getting token: " + accessToken);
+                    Console.WriteLine("Failed getting token: " + token);
                     Console.WriteLine("Call made (formatted as curl command, also placed in clipboard):");
-                    Console.WriteLine(curlDebugCommand);
-                    Clipboard.SetText(curlDebugCommand);
+                    Console.WriteLine(tokenHandler.CurlDebugCommand);
+                    Clipboard.SetText(tokenHandler.CurlDebugCommand);
                 }
                 else
                 {
-                    var accessTokenObject = JsonConvert.DeserializeObject<JObject>(accessToken);
+                    var tokenObject = JsonConvert.DeserializeObject<JObject>(token);
                     if (onlyToken)
                     {
-                        Console.WriteLine(accessTokenObject.GetValue("access_token"));
+                        Console.WriteLine(tokenObject.GetValue("access_token"));
                         Environment.Exit(0);
                     }
 
-                    Clipboard.SetText(accessTokenObject.Property("access_token").Value.ToString());
+                    Clipboard.SetText(tokenObject.Property("access_token").Value.ToString());
                     Console.WriteLine("Got successful response:");
                     Console.WriteLine("----------------------------------------");
-                    Console.WriteLine(accessToken);
+                    Console.WriteLine(token);
                     Console.WriteLine("----------------------------------------");
                     Console.WriteLine("Access token has been copied to clipboard.");
                 }
@@ -162,8 +169,22 @@ namespace MaskinportenTokenGenerator
                 Environment.Exit(isError ? 1 : 0);
             }
 
-            var server = new Server(token, serverPort);
-            Console.WriteLine("Enabling server mode, serving tokens at http://localhost:" + serverPort.ToString() + "/");
+
+            Server server; 
+
+            if (personMode)
+            {
+                string url = GetAuthorizeUrl(serverPort);
+                Console.WriteLine("Person login mode, opening browser to: " + url);
+                System.Diagnostics.Process.Start(url);
+                server = new Server(tokenHandler, serverPort, _issuer, GetRedirectUri(serverPort));
+            }
+            else
+            {
+                 server = new Server(tokenHandler, serverPort);
+            }
+
+            Console.WriteLine("Server started, serving tokens at http://localhost:" + serverPort.ToString() + "/");            
             Task.Run(() => server.Listen());
             Console.WriteLine("Press ESCAPE or CTRL-C to exit");
 
@@ -184,7 +205,7 @@ namespace MaskinportenTokenGenerator
         static void ShowHelp(OptionSet p)
         {
             Console.WriteLine("Usage: MaskinportenTokenGenerator.exe [OPTIONS]");
-            Console.WriteLine("Generates as JWT Bearer Grant and uses it against Maskinporten to get an access_token.");
+            Console.WriteLine("Generates as JWT Bearer Grant and uses it against Maskinporten/ID-porten to get tokens.");
             Console.WriteLine();
             Console.WriteLine("Options:");
             p.WriteOptionDescriptions(Console.Out);
@@ -227,6 +248,16 @@ namespace MaskinportenTokenGenerator
             if (!hasErrors) return;
             ShowHelp(p);
             Environment.Exit(1);
+        }
+
+        static string GetAuthorizeUrl(int serverPort)
+        {
+            return string.Format("{0}?scope={1}&acr_values=Level3&client_id={2}&redirect_uri={3}&response_type=code&prompt=login", _authorizeEndpoint, _scopes, _issuer, GetRedirectUri(serverPort));
+        }
+
+        static string GetRedirectUri(int serverPort)
+        {
+            return WebUtility.UrlEncode("http://localhost:" + serverPort.ToString() + "/response");
         }
     }
 }

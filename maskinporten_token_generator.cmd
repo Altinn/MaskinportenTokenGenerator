@@ -46,6 +46,8 @@ set resource=
 set scopes=
 set audience=
 set token_endpoint=
+set authorize_endpoint=
+set person_mode=
 
 if ["%~2"]==["test1"] (
 
@@ -64,6 +66,8 @@ if ["%~2"]==["test1"] (
 	set scopes=%dev_scopes%
 	set audience=%dev_audience%
 	set token_endpoint=%dev_token_endpoint%
+	set authorize_endpoint=%dev_authorize_endpoint%
+	set person_mode=%dev_person_mode%
 )
 
 if ["%~2"]==["ver2"] (
@@ -83,6 +87,8 @@ if ["%~2"]==["ver2"] (
 	set scopes=%test_scopes%
 	set audience=%test_audience%
 	set token_endpoint=%test_token_endpoint%
+	set authorize_endpoint=%test_authorize_endpoint%
+	set person_mode=%test_person_mode%
 )
 
 if ["%~2"]==["prod"] (
@@ -101,6 +107,8 @@ if ["%~2"]==["prod"] (
 	set scopes=%production_scopes%
 	set audience=%production_audience%
 	set token_endpoint=%production_token_endpoint%
+	set authorize_endpoint=%production_authorize_endpoint%
+	set person_mode=%production_person_mode%
 )
 
 set resource_opt=
@@ -123,7 +131,12 @@ if not ["%kid%"]==[""] (
 	set kid_opt=--kid=%kid%	
 )
 
-set cmd=%MPEXE% --client_id=%client_id% --audience=%audience% --token_endpoint=%token_endpoint% --scopes=%scopes% %only_token_opt% %server_mode_opt% %resource_opt% %certificate_thumbprint_opt% %keystore_opt% %kid_opt%
+set person_mode_opt=
+if not ["%person_mode%"]==[""] (
+	set person_mode_opt=--person_mode=%person_mode%
+)
+
+set cmd=%MPEXE% --client_id=%client_id% --audience=%audience% --token_endpoint=%token_endpoint% --authorize_endpoint=%authorize_endpoint% --scopes=%scopes% %only_token_opt% %person_mode_opt% %server_mode_opt% %resource_opt% %certificate_thumbprint_opt% %keystore_opt% %kid_opt%
 echo -------------------------------
 echo %cmd%
 echo -------------------------------

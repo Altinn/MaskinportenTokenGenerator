@@ -30,6 +30,9 @@ set production_audience=https://maskinporten.no/
 :: Endpoint to send bearer grant assertion
 set production_token_endpoint=https://maskinporten.no/token
 
+:: Endpoint for authorization (person mode)
+set production_authorize_endpoint=https://oidc.difi.no/idporten-oidc-provider/authorize
+
 :: --------- VER2 (for ATxx/TT02) SETTINGS -----------
 set test_certificate_thumbprint=
 ::set test_keystore_path=
@@ -40,6 +43,7 @@ set test_resource=
 set test_scopes=
 set test_audience=https://ver2.maskinporten.no/
 set test_token_endpoint=https://ver2.maskinporten.no/token
+set test_authorize_endpoint=https://oidc-ver2.difi.no/idporten-oidc-provider/authorize
 
 :: --------- TEST1 (for DEV) SETTINGS -----------
 set dev_certificate_thumbprint=
@@ -51,3 +55,4 @@ set dev_resource=
 set dev_scopes=
 set dev_audience=https://test1.maskinporten.no/
 set dev_token_endpoint=https://test1.maskinporten.no/token
+set dev_authorize_endpoint=https://oidc-test1.difi.no/idporten-oidc-provider/authorize

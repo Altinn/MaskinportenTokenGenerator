@@ -9,14 +9,19 @@ namespace MaskinportenTokenGenerator
     {
         private HttpListener _listener;
         private int _port;
-        private Token _token;
+        private TokenHandler _tokenHandler;
         private static string _cachedToken = null;
         private static DateTime _cachedTokenTtl = DateTime.Now;
+        private string _authCode = null;
+        private string _clientId = null;
+        private string _redirectUri = null;
 
-        public Server(Token token, int port)
+        public Server(TokenHandler token, int port, string clientId = null, string redirectUri = null)
         {
-            _token = token;
+            _tokenHandler = token;
             _port = port;
+            _clientId = clientId;
+            _redirectUri = redirectUri;
         }
 
         public void Listen()
@@ -29,8 +34,14 @@ namespace MaskinportenTokenGenerator
             {
                 try
                 {
-                    HttpListenerContext context = _listener.GetContext();
-                    Process(context);
+                    if (_listener.IsListening) {
+                        HttpListenerContext context = _listener.GetContext();
+                        Route(context);
+                    }
+                    else
+                    {
+                        break;
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -41,15 +52,28 @@ namespace MaskinportenTokenGenerator
             // ReSharper disable once FunctionNeverReturns
         }
 
-        private void Process(HttpListenerContext context)
+        private void Route(HttpListenerContext context)
         {
-            // To avoid fetching a token for favicon.ico requests
-            if (context.Request.Url.AbsolutePath != "/") {
-                context.Response.StatusCode = (int) HttpStatusCode.NotFound;
-                context.Response.OutputStream.Close();
-                return;
-            }
 
+            switch (context.Request.Url.AbsolutePath)
+            {
+                case "/":
+                    ProcessTokenRequest(context);
+                    break;
+
+                case "/response":
+                    ProcessAuthorizeResponse(context);
+                    break;
+
+                default:
+                    context.Response.StatusCode = (int) HttpStatusCode.NotFound;
+                    context.Response.OutputStream.Close();
+                    break;
+            }
+        }
+
+        private void ProcessTokenRequest(HttpListenerContext context)
+        {
             string cacheQueryString = context.Request.QueryString["cache"];
             bool useCache = cacheQueryString != null && (cacheQueryString == "1" || cacheQueryString.ToLower() == "true");
             string accessToken;
@@ -59,8 +83,15 @@ namespace MaskinportenTokenGenerator
 
             if (!useCache || _cachedToken == null || _cachedTokenTtl < DateTime.Now) {
                 //Console.WriteLine("Cache stale or disabled, fetching new token");
-                assertion = _token.GetJwtAssertion();
-                accessToken = _token.GetAccessToken(assertion, out isError, out _);
+                assertion = _tokenHandler.GetJwtAssertion();
+                if (_authCode != null)
+                {
+                    accessToken = _tokenHandler.GetTokenFromAuthCodeGrant(assertion, _authCode, _clientId, _redirectUri, out isError);
+                }
+                else
+                {
+                    accessToken = _tokenHandler.GetTokenFromJwtBearerGrant(assertion, out isError);
+                }                
             }
             else {
                 isError = false;
@@ -71,8 +102,16 @@ namespace MaskinportenTokenGenerator
 
             if (isError)
             {
-                //Console.WriteLine("Error occured, returning 500 internal server error");
                 context.Response.StatusCode = (int) HttpStatusCode.InternalServerError;
+                Console.WriteLine("################");
+                Console.WriteLine("500 Internal Server error: Failed getting token");
+                Console.WriteLine("Response from token endpoint was:");
+                Console.WriteLine("---------------");
+                Console.WriteLine(accessToken);
+                Console.WriteLine("---------------");
+                Console.WriteLine("Call made (formatted as curl command):");
+                Console.WriteLine(_tokenHandler.CurlDebugCommand);
+                if (_tokenHandler.LastException != null) TokenHandler.PrettyPrintException(_tokenHandler.LastException);
             }
             else {
                 context.Response.ContentType = "application/json";
@@ -94,6 +133,25 @@ namespace MaskinportenTokenGenerator
             //Console.WriteLine("----- COMPLETE -----");
 
             context.Response.OutputStream.Close();
+        }
+
+        private void ProcessAuthorizeResponse(HttpListenerContext context)
+        {
+            string code = context.Request.QueryString["code"];
+
+            if (code == null)
+            {
+                context.Response.StatusCode = (int) HttpStatusCode.BadRequest;
+            }
+            else
+            {
+                _authCode = code;
+                context.Response.AddHeader("Cache-Control", "no-cache");
+                context.Response.StatusCode = (int) HttpStatusCode.Redirect;
+                context.Response.AddHeader("Location", "/?cache=true");
+            }
+
+            context.Response.OutputStream.Close();           
         }
     }
 }

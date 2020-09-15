@@ -65,7 +65,7 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Server.cs" />
-    <Compile Include="Token.cs" />
+    <Compile Include="TokenHandler.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

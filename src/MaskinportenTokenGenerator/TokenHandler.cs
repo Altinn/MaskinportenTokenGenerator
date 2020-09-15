@@ -10,19 +10,22 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace MaskinportenTokenGenerator
 {
-    public class Token
+    public class TokenHandler
     {
 
-        private static string _issuer;
-        private static string _audience;
-        private static string _resource;
-        private static string _scopes;
-        private static string _tokenEndpoint;
-        private static int _tokenTtl;
-        private static X509Certificate2 _signingCertificate;
-        private static string _kidClaim;
+        private readonly string _issuer;
+        private readonly string _audience;
+        private readonly string _resource;
+        private readonly string _scopes;
+        private readonly string _tokenEndpoint;
+        private readonly int _tokenTtl;
+        private readonly X509Certificate2 _signingCertificate;
+        private readonly string _kidClaim;
 
-        public Token(string certificateThumbprint, string kidClaim, string tokenEndpoint, string audience, string resource,
+        public Exception LastException { get; private set; }
+        public string CurlDebugCommand { get; private set; }
+
+        public TokenHandler(string certificateThumbprint, string kidClaim, string tokenEndpoint, string audience, string resource,
             string scopes, string issuer, int tokenTtl)
         {
             _signingCertificate = GetCertificateFromKeyStore(certificateThumbprint, StoreName.My, StoreLocation.LocalMachine);
@@ -36,7 +39,7 @@ namespace MaskinportenTokenGenerator
             _tokenTtl = tokenTtl;
         }
 
-        public Token(string p12KeyStoreFile, string p12KeyStorePassword, string kidClaim, string tokenEndpoint, string audience, string resource,
+        public TokenHandler(string p12KeyStoreFile, string p12KeyStorePassword, string kidClaim, string tokenEndpoint, string audience, string resource,
             string scopes, string issuer, int tokenTtl)
         {
             _signingCertificate = new X509Certificate2();
@@ -51,7 +54,25 @@ namespace MaskinportenTokenGenerator
             _tokenTtl = tokenTtl;
         }
 
-        public string GetAccessToken(string assertion, out bool isError, out string curlDebugCommand)
+        public string GetTokenFromAuthCodeGrant(string assertion, string code, string clientId, string redirectUri, out bool isError)
+        {
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+
+            var formContent = new FormUrlEncodedContent(new List<KeyValuePair<string, string>>
+            {
+                new KeyValuePair<string, string>("client_id", clientId),
+                new KeyValuePair<string, string>("grant_type", "authorization_code"),
+                new KeyValuePair<string, string>("code", code),
+                // FIXME! This somehow breaks with an error claiming that the redirectUri does not match
+                //new KeyValuePair<string, string>("redirect_uri", redirectUri),
+                new KeyValuePair<string, string>("client_assertion_type", "urn:ietf:params:oauth:client-assertion-type:jwt-bearer"),
+                new KeyValuePair<string, string>("client_assertion", assertion),
+            });
+
+            return SendTokenRequest(formContent, out isError);     
+        }
+
+        public string GetTokenFromJwtBearerGrant(string assertion, out bool isError)
         {
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
 
@@ -61,34 +82,26 @@ namespace MaskinportenTokenGenerator
                 new KeyValuePair<string, string>("assertion", assertion),
             });
 
-            var client = new HttpClient();
+            return SendTokenRequest(formContent, out isError);            
+        }
 
-            curlDebugCommand = "curl -v -X POST -d '" + formContent.ReadAsStringAsync().Result + "' " + _tokenEndpoint;
-            try {
-                var response = client.PostAsync(_tokenEndpoint, formContent).Result;
-                isError = !response.IsSuccessStatusCode;
-                return response.Content.ReadAsStringAsync().Result;
-            }
-            catch (Exception e)
+        public static void PrettyPrintException(Exception e)
+        {
+            Console.WriteLine("############");
+            Console.WriteLine("Failed request to token endpoint, Exception thrown: " + e.GetType().FullName);
+            Console.WriteLine("Message:" + e.Message);
+            Console.WriteLine("Stack trace:");
+            Console.WriteLine(e.StackTrace);
+            while (e.InnerException != null)
             {
-                isError = true;
-                Console.WriteLine("############");
-                Console.WriteLine("Failed request to " + _tokenEndpoint + ", Exception thrown: " + e.GetType().FullName);
-                Console.WriteLine("Message:" + e.Message);
+                Console.WriteLine("Inner Exception:" + e.InnerException.GetType().FullName);
+                Console.WriteLine("Message:" + e.InnerException.Message);
                 Console.WriteLine("Stack trace:");
-                Console.WriteLine(e.StackTrace);
-                while (e.InnerException != null)
-                {
-                    Console.WriteLine("Inner Exception:" + e.InnerException.GetType().FullName);
-                    Console.WriteLine("Message:" + e.InnerException.Message);
-                    Console.WriteLine("Stack trace:");
-                    Console.WriteLine(e.InnerException.StackTrace);
-                    e = e.InnerException;
-                }
-
-                Console.WriteLine("############");
-                return null;
+                Console.WriteLine(e.InnerException.StackTrace);
+                e = e.InnerException;
             }
+
+            Console.WriteLine("############");
         }
 
         public string GetJwtAssertion()
@@ -131,6 +144,25 @@ namespace MaskinportenTokenGenerator
             var handler = new JwtSecurityTokenHandler();
 
             return handler.WriteToken(securityToken);
+        }
+
+        private string SendTokenRequest(FormUrlEncodedContent formContent, out bool isError)
+        {
+            var client = new HttpClient();
+
+            CurlDebugCommand = "curl -v -X POST -d '" + formContent.ReadAsStringAsync().Result + "' " + _tokenEndpoint;
+            try {
+                var response = client.PostAsync(_tokenEndpoint, formContent).Result;
+                isError = !response.IsSuccessStatusCode;
+                return response.Content.ReadAsStringAsync().Result;
+            }
+            catch (Exception e)
+            {
+                LastException = e;
+                isError = true;
+                PrettyPrintException(e);
+                return null;
+            }
         }
 
         private static X509Certificate2 GetCertificateFromKeyStore(string thumbprint, StoreName storeName, StoreLocation storeLocation, bool onlyValid = false)
