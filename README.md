@@ -46,3 +46,4 @@ MIT
 
 ## Changelog (since Sep. 2020)
 2020-09-15: Added preliminary support for ID-porten personal login / authcode flow
+2020-09-15: Added scripts for managing scope access

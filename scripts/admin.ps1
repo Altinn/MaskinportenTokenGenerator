@@ -1,18 +1,16 @@
 ﻿# Script to updates service owner access to Altinn service owner scopes defined in ID/Maskinporten
 # Author: bdl@digdir.no
 # -----------------------------------------------------------------------------------------------------------------
-# NOTE! Requires MaskinportenTokenGenerator to be running in server mode on port 17823 configured to return a token 
-# with "idporten:scopes.write" scope for the requested environment
+# NOTE! Requires a "scopes-admin.config.local.cmd" file present in same directory as script.
 # -----------------------------------------------------------------------------------------------------------------
 #
 # Examples: 
-# ./admin.ps1 -Env tt02 -Report         --> Generates a report showing all orgs having access to a scope
-# ./admin.ps1 -Env tt02 -ShowMissing   --> List all serviceowners missing scope access
-# ./admin.ps1 -Env tt02 -ShowExtra     --> List all scopes having orgs with access that are not serviceowners
-# ./admin.ps1 -Env tt02 -AddMissing    --> Grant service owners access to missing scopes, if any
-# ./admin.ps1 -Env tt02 -RemoveExtra   --> Revoke non-service owners access to scopes, if any
+# ./admin.ps1 -Env ver2 -Report         --> Generates a report showing all orgs having access to a scope
+# ./admin.ps1 -Env ver2 -ShowMissing   --> List all serviceowners missing scope access
+# ./admin.ps1 -Env ver2 -ShowExtra     --> List all scopes having orgs with access that are not serviceowners
+# ./admin.ps1 -Env ver2 -AddMissing    --> Grant service owners access to missing scopes, if any
+# ./admin.ps1 -Env ver2 -RemoveExtra   --> Revoke non-service owners access to scopes, if any
 
-#. ($PSScriptRoot + "\serviceowners.ps1")
 
 [cmdletbinding()]
 param (

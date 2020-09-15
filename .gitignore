@@ -1,8 +1,9 @@
 
 # Project specific
 
-config.local*
+**/*config.local*
 scripts/serviceowners.local.json
+
 
 ### VisualStudio ###
 ## Ignore Visual Studio temporary files, build results, and
