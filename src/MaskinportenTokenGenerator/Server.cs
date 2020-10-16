@@ -91,7 +91,7 @@ namespace MaskinportenTokenGenerator
                 else
                 {
                     accessToken = _tokenHandler.GetTokenFromJwtBearerGrant(assertion, out isError);
-                }                
+                }
             }
             else {
                 isError = false;
@@ -112,11 +112,18 @@ namespace MaskinportenTokenGenerator
                 Console.WriteLine("Call made (formatted as curl command):");
                 Console.WriteLine(_tokenHandler.CurlDebugCommand);
                 if (_tokenHandler.LastException != null) TokenHandler.PrettyPrintException(_tokenHandler.LastException);
+                if (_tokenHandler.LastTokenRequest != null) {
+                    Console.WriteLine("Token Request:");
+                    Console.WriteLine("---------------");
+                    Console.WriteLine(_tokenHandler.LastTokenRequest);
+                    Console.WriteLine("---------------");
+                }
             }
             else {
                 context.Response.ContentType = "application/json";
                 context.Response.ContentLength64 = accessToken.Length;
                 context.Response.AddHeader("Cache-Control", "no-cache");
+                context.Response.AddHeader("X-TokenRequest", _tokenHandler.LastTokenRequest);
 
                 var bytes = Encoding.UTF8.GetBytes(accessToken);
                 context.Response.OutputStream.Write(bytes, 0, bytes.Length);

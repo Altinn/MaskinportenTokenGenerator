@@ -21,12 +21,14 @@ namespace MaskinportenTokenGenerator
         private readonly int _tokenTtl;
         private readonly X509Certificate2 _signingCertificate;
         private readonly string _kidClaim;
+        private readonly string _consumerOrg;
 
+        public string LastTokenRequest { get; private set; }
         public Exception LastException { get; private set; }
         public string CurlDebugCommand { get; private set; }
 
         public TokenHandler(string certificateThumbprint, string kidClaim, string tokenEndpoint, string audience, string resource,
-            string scopes, string issuer, int tokenTtl)
+            string scopes, string issuer, int tokenTtl, string consumerOrg)
         {
             _signingCertificate = GetCertificateFromKeyStore(certificateThumbprint, StoreName.My, StoreLocation.LocalMachine);
 
@@ -37,10 +39,11 @@ namespace MaskinportenTokenGenerator
             _scopes = scopes;
             _issuer = issuer;
             _tokenTtl = tokenTtl;
+            _consumerOrg = consumerOrg;
         }
 
         public TokenHandler(string p12KeyStoreFile, string p12KeyStorePassword, string kidClaim, string tokenEndpoint, string audience, string resource,
-            string scopes, string issuer, int tokenTtl)
+            string scopes, string issuer, int tokenTtl, string consumerOrg)
         {
             _signingCertificate = new X509Certificate2();
             _signingCertificate.Import(File.ReadAllBytes(p12KeyStoreFile), p12KeyStorePassword, X509KeyStorageFlags.MachineKeySet | X509KeyStorageFlags.PersistKeySet | X509KeyStorageFlags.Exportable);
@@ -52,6 +55,7 @@ namespace MaskinportenTokenGenerator
             _scopes = scopes;
             _issuer = issuer;
             _tokenTtl = tokenTtl;
+            _consumerOrg = consumerOrg;
         }
 
         public string GetTokenFromAuthCodeGrant(string assertion, string code, string clientId, string redirectUri, out bool isError)
@@ -69,6 +73,7 @@ namespace MaskinportenTokenGenerator
                 new KeyValuePair<string, string>("client_assertion", assertion),
             });
 
+            LastTokenRequest = formContent.ReadAsStringAsync().Result;
             return SendTokenRequest(formContent, out isError);     
         }
 
@@ -82,6 +87,7 @@ namespace MaskinportenTokenGenerator
                 new KeyValuePair<string, string>("assertion", assertion),
             });
 
+            LastTokenRequest = formContent.ReadAsStringAsync().Result;
             return SendTokenRequest(formContent, out isError);            
         }
 
@@ -139,6 +145,10 @@ namespace MaskinportenTokenGenerator
                 { "iat", dateTimeOffset.ToUnixTimeSeconds() },
                 { "jti", Guid.NewGuid().ToString() },
             };
+
+            if (_consumerOrg != null) {
+                payload.Add("consumer_org", _consumerOrg);
+            }
 
             var securityToken = new JwtSecurityToken(header, payload);
             var handler = new JwtSecurityTokenHandler();

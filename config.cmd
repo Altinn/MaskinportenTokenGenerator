@@ -26,12 +26,20 @@ set production_scopes=
 
 :: The aud claim for the bearer grant assertion. Used as issuer claim in returned token
 set production_audience=https://maskinporten.no/
+:: For ID-porten: set production_audience=https://oidc.difi.no/idporten-oidc-provider/
 
 :: Endpoint to send bearer grant assertion
+:: For ID-porten: set production_token_endpoint=https://oidc.difi.no/idporten-oidc-provider/token
 set production_token_endpoint=https://maskinporten.no/token
 
-:: Endpoint for authorization (person mode)
+:: Endpoint for authorization (only used for person mode)
 set production_authorize_endpoint=https://oidc.difi.no/idporten-oidc-provider/authorize
+
+:: Enables login with a person in ID-porten and authCode flow. Implies server mode, and requires a ID-porten client configured with private_jwt authentication
+set production_person_mode=false
+
+:: Enables supplier mode for use with Maskinporten and delegation schemes. Enter the organization number that will have to delegate access to this scope in Altinn
+set production_consumer_org=
 
 :: --------- VER2 (for ATxx/TT02) SETTINGS -----------
 set test_certificate_thumbprint=
@@ -44,6 +52,8 @@ set test_scopes=
 set test_audience=https://ver2.maskinporten.no/
 set test_token_endpoint=https://ver2.maskinporten.no/token
 set test_authorize_endpoint=https://oidc-ver2.difi.no/idporten-oidc-provider/authorize
+set test_person_mode=false
+set test_consumer_org=
 
 :: --------- TEST1 (for DEV) SETTINGS -----------
 set dev_certificate_thumbprint=
@@ -56,3 +66,5 @@ set dev_scopes=
 set dev_audience=https://test1.maskinporten.no/
 set dev_token_endpoint=https://test1.maskinporten.no/token
 set dev_authorize_endpoint=https://oidc-test1.difi.no/idporten-oidc-provider/authorize
+set dev_person_mode=false
+set dev_consumer_org=

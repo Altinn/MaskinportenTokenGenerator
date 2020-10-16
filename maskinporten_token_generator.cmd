@@ -1,7 +1,7 @@
-@echo off
+@echo off >NUL
 setlocal
 
-cd %~dp0
+cd %~dp0 >NUL
 set MPEXE=%~dp0\src\MaskinportenTokenGenerator\bin\Debug\MaskinportenTokenGenerator.exe
 if not exist %MPEXE% (
 	echo %MPEXE% not found. Build it first.
@@ -19,6 +19,7 @@ if ["%~1"]==["onlytoken"] (
 	set only_token_opt="--only_token"
 )
 
+
 set local_config=
 if ["%~3"]==[""] (
 	set local_config=config.local.cmd
@@ -28,7 +29,9 @@ if ["%~3"]==[""] (
 		pause
 		exit /b 1
 	)
-	echo Using custom config file: %~3
+	if ["%only_token_opt%"]==[""] (
+		echo Using custom config file: %~3
+	)
 	set local_config=%~3
 ) 
 
@@ -48,6 +51,7 @@ set audience=
 set token_endpoint=
 set authorize_endpoint=
 set person_mode=
+set consumer_org=
 
 if ["%~2"]==["test1"] (
 
@@ -68,6 +72,7 @@ if ["%~2"]==["test1"] (
 	set token_endpoint=%dev_token_endpoint%
 	set authorize_endpoint=%dev_authorize_endpoint%
 	set person_mode=%dev_person_mode%
+	set consumer_org=%dev_consumer_org%
 )
 
 if ["%~2"]==["ver2"] (
@@ -89,6 +94,7 @@ if ["%~2"]==["ver2"] (
 	set token_endpoint=%test_token_endpoint%
 	set authorize_endpoint=%test_authorize_endpoint%
 	set person_mode=%test_person_mode%
+	set consumer_org=%test_consumer_org%
 )
 
 if ["%~2"]==["prod"] (
@@ -109,6 +115,7 @@ if ["%~2"]==["prod"] (
 	set token_endpoint=%production_token_endpoint%
 	set authorize_endpoint=%production_authorize_endpoint%
 	set person_mode=%production_person_mode%
+	set consumer_org=%prod_consumer_org%
 )
 
 set resource_opt=
@@ -136,8 +143,15 @@ if not ["%person_mode%"]==[""] (
 	set person_mode_opt=--person_mode=%person_mode%
 )
 
-set cmd=%MPEXE% --client_id=%client_id% --audience=%audience% --token_endpoint=%token_endpoint% --authorize_endpoint=%authorize_endpoint% --scopes=%scopes% %only_token_opt% %person_mode_opt% %server_mode_opt% %resource_opt% %certificate_thumbprint_opt% %keystore_opt% %kid_opt%
-echo -------------------------------
-echo %cmd%
-echo -------------------------------
+set consumer_org_opt=
+if not ["%consumer_org%"]==[""] (
+	set consumer_org_opt=--consumer_org=%consumer_org%
+)
+
+set cmd=%MPEXE% --client_id=%client_id% --audience=%audience% --token_endpoint=%token_endpoint% --authorize_endpoint=%authorize_endpoint% --scopes=%scopes% %only_token_opt% %person_mode_opt% %server_mode_opt% %resource_opt% %certificate_thumbprint_opt% %keystore_opt% %kid_opt% %consumer_org_opt%
+if ["%only_token_opt%"]==[""] (
+	echo -------------------------------
+	echo %cmd%
+	echo -------------------------------
+)
 %cmd%

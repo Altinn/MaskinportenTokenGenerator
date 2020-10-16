@@ -22,6 +22,7 @@ namespace MaskinportenTokenGenerator
         private static string _tokenEndpoint;
         private static string _authorizeEndpoint;
         private static int _tokenTtl = 120;
+        private static string _consumerOrg;
 
         [STAThread]
         static void Main(string[] args)
@@ -63,6 +64,8 @@ namespace MaskinportenTokenGenerator
                     v => _tokenEndpoint = v },
                 { "A=|authorize_endpoint=",  "Authorize endpoint to redirect user for consent",
                     v => _authorizeEndpoint = v },
+                { "C|consumer_org=", "Enable supplier mode for given consumer organization number",
+                    v => _consumerOrg = v },
                 { "m|server_mode",  "Enable server mode",
                     v => serverMode = v != null  },
                 { "P=|server_port=",  "Server port (default 17823)",
@@ -108,11 +111,11 @@ namespace MaskinportenTokenGenerator
             TokenHandler tokenHandler;
             try {
                 if (_certificateThumbPrint != null) {
-                    tokenHandler = new TokenHandler(_certificateThumbPrint, _kidClaim, _tokenEndpoint, _audience, _resource, _scopes, _issuer, _tokenTtl);
+                    tokenHandler = new TokenHandler(_certificateThumbPrint, _kidClaim, _tokenEndpoint, _audience, _resource, _scopes, _issuer, _tokenTtl, _consumerOrg);
                 }
                 else
                 {
-                    tokenHandler = new TokenHandler(_p12KeyStoreFile, _p12KeyStorePassword, _kidClaim, _tokenEndpoint, _audience, _resource, _scopes, _issuer, _tokenTtl);
+                    tokenHandler = new TokenHandler(_p12KeyStoreFile, _p12KeyStorePassword, _kidClaim, _tokenEndpoint, _audience, _resource, _scopes, _issuer, _tokenTtl, _consumerOrg);
                 }
             }
             catch (Exception e)
@@ -252,7 +255,7 @@ namespace MaskinportenTokenGenerator
 
         static string GetAuthorizeUrl(int serverPort)
         {
-            return string.Format("{0}?scope={1}&acr_values=Level3&client_id={2}&redirect_uri={3}&response_type=code&prompt=login", _authorizeEndpoint, _scopes, _issuer, GetRedirectUri(serverPort));
+            return string.Format("{0}?scope={1}&acr_values=Level3&client_id={2}&redirect_uri={3}&response_type=code&ui_locales=en", _authorizeEndpoint, WebUtility.UrlEncode(_scopes), _issuer, GetRedirectUri(serverPort));
         }
 
         static string GetRedirectUri(int serverPort)

@@ -40,10 +40,10 @@ Here "BearerToken" is an environment variable, which can be put in the "Token"-f
 
 *If you are testing MaskinportenAPI, see https://github.com/Altinn/MaskinportenApiPostman for a pre-configured Postman collection*
 
-
 ## License
 MIT
 
 ## Changelog (since Sep. 2020)
+* 2020-10-16: Added support for [supplier integrations](https://difi.github.io/felleslosninger/maskinporten_guide_apikonsument.html#bruke-delegering-som-leverand%C3%B8r) for delegated Maskinporten scopes
 * 2020-09-15: Added preliminary support for ID-porten personal login / authcode flow
 * 2020-09-15: Added scripts for managing scope access
