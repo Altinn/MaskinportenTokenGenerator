@@ -1,8 +1,7 @@
 # Script to manage access (whitelisting) to scopes defined in ID/Maskinporten
 # Author: bdl@digdir.no
 # -----------------------------------------------------------------------------------------------------------------
-# NOTE! Requires MaskinportenTokenGenerator to be running in server mode on port 17823 configured to return a token 
-# with "idporten:scopes.write" scope for the requested environment
+# NOTE! Requires a "scopes-admin.config.local.cmd" file present in same directory as script.
 # -----------------------------------------------------------------------------------------------------------------
 #
 # Examples: 
@@ -19,6 +18,9 @@ param (
     [Parameter()][string]$org,
     [Parameter()][string]$env = "ver2"
 )
+
+. ($PSScriptRoot + "/config.ps1")
+. ($PSScriptRoot + "/token.ps1")
 
 function Add-Scope-Access {
     param($Scope, $Org)
@@ -54,19 +56,9 @@ function Get-Scope-Access-All {
     }
 }
 
-function Get-Token {
-    $result = Invoke-RestMethod -Uri http://localhost:17823/?cache=true
-    if ($null -eq $result.access_token) {
-        Write-Error "Did not get token"
-        Exit 1
-    }
-
-    return $result.access_token
-}
-
 function Get-All-Scopes-Starting-With {
     param($Prefix)
-    $result = Invoke-API -Verb GET -Path "/scopes" | where { $_.name -match ("^" + $Prefix) }
+    $result = Invoke-API -Verb GET -Path "/scopes" | Where-Object { $_.name -match ("^" + $Prefix) }
     return $result
 }
 

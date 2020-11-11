@@ -17,7 +17,7 @@ param (
     [Parameter(Mandatory=$true)][string]$Env,
     [Parameter(ParameterSetName="Report")][Switch]$Report,
     [Parameter(ParameterSetName="ShowMissing")][Switch]$ShowMissing,
-    [Parameter(ParameterSetName="ShowExtra")][Switch]$howExtra,
+    [Parameter(ParameterSetName="ShowExtra")][Switch]$ShowExtra,
     [Parameter(ParameterSetName="AddMissing")][Switch]$AddMissing,
     [Parameter(ParameterSetName="RemoveExtra")][Switch]$RemoveExtrase
 )
@@ -53,11 +53,13 @@ function Generate-Full-Report {
 function Generate-Missing-Report {
     $report = Generate-Full-Report
     $serviceOwners = Get-ServiceOwners -Env $env
+
     $missingReport = @{}
     foreach ($so in $serviceOwners) {
         $missing = @()
+        Write-Verbose $so
         foreach ($scopeaccess in $report.GetEnumerator()) {
-            if ($scopeaccess.Value.Contains($so.orgnr)) {
+            if ($null -ne $scopeaccess.Value -and $scopeaccess.Value.Contains($so.orgnr)) {
                 Write-Verbose ($so.name.en + " (" + $so.orgnr + ") has access to " + $scopeaccess.Key)                
             } else {
                 Write-Verbose ($so.name.en + " (" + $so.orgnr + ") MISSING access to " + $scopeaccess.Key)
