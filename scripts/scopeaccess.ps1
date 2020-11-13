@@ -21,6 +21,7 @@ param (
 
 . ($PSScriptRoot + "/config.ps1")
 . ($PSScriptRoot + "/token.ps1")
+. ($PSScriptRoot + "/env.ps1")
 
 function Add-Scope-Access {
     param($Scope, $Org)
@@ -62,41 +63,7 @@ function Get-All-Scopes-Starting-With {
     return $result
 }
 
-function Invoke-API {
-    param($Verb, $Path)
-    $access_token = Get-Token
-    $url = $envUrl + $Path
-    try {
-        $result = Invoke-RestMethod -Uri $url -Method $Verb -Headers @{
-            Accept = "application/json"
-            Authorization = "Bearer $access_token"
-        }
-    }
-    catch {
-        Write-Warning "Request $verb $url failed"
-        Write-Warning ("Server gave status code: " + $_.Exception.Response.StatusCode)
-        Exit 1
-    }
-
-    return $result
-}
-
 #####################################################
-
-$validenv = "test1", "ver1", "ver2", "prod"
-
-if ($validenv -notcontains $env) {
-    Write-Error ("Invalid env supplied. Valid environments: " + $validenv) 
-    Exit 1
-}
-
-if ($env -eq "prod") {
-    $envurl = "https://integrasjon.difi.no"
-}
-else {
-    $envurl = "https://integrasjon-$env.difi.no"
-
-}
 
 if ($operator -eq "add") {
     if ($org -eq "") {

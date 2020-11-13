@@ -33,8 +33,8 @@ function Get-ServiceOwners {
     }
     $tmp = Get-Content -Raw -Path $sofile | ConvertFrom-Json 
     $so = @{}
-    $tmp.orgs.psobject.properties | Foreach { $so[$_.Name] = $_.Value }
-    $so.Values | Where { $_.environments -and $_.environments.Contains($Env) }
+    $tmp.orgs.psobject.properties | ForEach-Object { $so[$_.Name] = $_.Value }
+    $so.Values | Where-Object { $_.environments -and $_.environments.Contains($Env) }
 }
 
 function Generate-Full-Report {

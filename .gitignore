@@ -3,6 +3,8 @@
 
 **/*config.local*
 scripts/serviceowners.local.json
+scripts/exported
+scripts/imported
 
 
 ### VisualStudio ###

@@ -1,1 +1,1 @@
-This directory contains various scripts that can be useful for performing/automating various administrative tasks related to ID/Maskinporten.
+This directory contains scripts that can be useful for performing/automating various administrative tasks related to ID/Maskinporten.
