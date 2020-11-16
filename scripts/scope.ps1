@@ -140,7 +140,7 @@ function Export-To-CSV {
         $filename += $prefix + "-"
     }
     $filename += (Get-Date -Format "yyyy-MM-dd_HHmmss") + ".csv"
-    $scopes = ScalarizeAllowedIntegrationTypes $scopes
+    $scopes = ProcessToCsv $scopes
     $scopes | Select-Object -Property * -ExcludeProperty created,last_updated | Export-Csv -Path .\$filename -NoTypeInformation -Encoding unicode
     Write-Output "Exported to $filename."
 }
@@ -148,30 +148,44 @@ function Export-To-CSV {
 function Import-From-CSV {
     param($file)
     $scopes = Get-Content -Raw $file | ConvertFrom-Csv 
-    $scopes = ArrayizeAllowedIntegrationTypes $scopes
+    $scopes = ProcessFromCsv $scopes
     Convert-Scopes-To-Json-Files $scopes "imported"
 }
 
-function ScalarizeAllowedIntegrationTypes {
+function ProcessToCsv {
     param($scopes)
     $newscopes = [System.Collections.ArrayList]::new(); 
     $scopes | ForEach-Object { 
+        # We cannot handle arrays in CSV
         $_.allowed_integration_types = [system.String]::Join(",", $_.allowed_integration_types); 
+
+        # delegation_source might be omitted, always include even if not supplied
+        if (!("delegation_source" -in $_.PSobject.Properties.Name)) {
+            $_ | Add-Member -NotePropertyName "delegation_source" -NotePropertyValue ""
+        }
+
         [void]$newscopes.Add($_); 
     }
     $newscopes
 }
 
-function ArrayizeAllowedIntegrationTypes {
+# This effectively does the reverse of ProcessToCsv
+function ProcessFromCsv {
     param($scopes)
     $newscopes = [System.Collections.ArrayList]::new(); 
     $scopes | ForEach-Object { 
-        $_.allowed_integration_types = $_.allowed_integration_types.Split(","); 
+        # Convert from comma separated list to array
+        $_.allowed_integration_types = $_.allowed_integration_types.Split(",");
+
+        # Drop delegation_schemes without value
+        if ($_.delegation_source -eq "") {
+            $_ = $_ | Select-Object -Property * -ExcludeProperty delegation_source
+        }
+
         [void]$newscopes.Add($_); 
     }
     $newscopes
 }
-
 
 #####################################################
 
