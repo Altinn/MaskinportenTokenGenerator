@@ -6,6 +6,7 @@
 #
 # Examples: 
 # ./scopeaccess.ps1 get someprefix:somescope                -> Returns a list of organizations with access to someprefix:somescope
+# ./scopeaccess.ps1 getorg 912345678                        -> Returns a list of scopes granted a organizations
 # ./scopeaccess.ps1 get someprefix:somescope 912345678      -> Returns the scope access for a given scope and organization
 # ./scopeaccess.ps1 remove someprefix:somescope 912345678   -> Revoke 912345678 access to someprefix:somescope
 # ./scopeaccess.ps1 add someprefix:somescope 912345678      -> Grant 912345678 access to someprefix:somescope
@@ -14,7 +15,7 @@
 
 param (
     [Parameter(Mandatory=$true)][string]$operator,
-    [Parameter(Mandatory=$true)][string]$scope,
+    [Parameter()][string]$scope,
     [Parameter()][string]$org,
     [Parameter()][string]$env = "ver2"
 )
@@ -37,7 +38,12 @@ function Remove-Scope-Access {
 
 function Get-Scope-Access {
     param($Scope, $Org)
-    $result = Invoke-API -Verb GET -Path "/scopes/access/?consumer_orgno=$Org&scope=$scope"
+    if ($Scope -eq "") {
+        $result = Invoke-API -Verb GET -Path "/scopes/access/?consumer_orgno=$Org"
+    }
+    else {
+        $result = Invoke-API -Verb GET -Path "/scopes/access/?consumer_orgno=$Org&scope=$scope"
+    }
     if ($null -eq $result) {
         Write-Output "No scope or org found"
     }
@@ -87,9 +93,16 @@ elseif ($operator -eq "get") {
         Get-Scope-Access -Scope $scope -Org $org
     }
 }
+elseif ($operator -eq "getorg") {
+    if ($org -eq "") {
+        Write-Error "Organization number must be supplied"
+        Exit 1
+    }
+    Get-Scope-Access -Org $org -Scope ""
+}
 elseif ($operator -eq "listprefix") {
     Get-All-Scopes-Starting-With -Prefix $scope
 }
 else {
-    Write-Error 'Operation must be one of "add", "remove", "get" or listprefix'
+    Write-Error 'Operation must be one of "add", "remove", "get", "getorg" or "listprefix"'
 }

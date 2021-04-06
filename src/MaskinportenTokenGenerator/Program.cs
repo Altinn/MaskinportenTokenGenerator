@@ -255,7 +255,7 @@ namespace MaskinportenTokenGenerator
 
         static string GetAuthorizeUrl(int serverPort)
         {
-            return string.Format("{0}?scope={1}&acr_values=Level3&client_id={2}&redirect_uri={3}&response_type=code&ui_locales=en", _authorizeEndpoint, WebUtility.UrlEncode(_scopes), _issuer, GetRedirectUri(serverPort));
+            return string.Format("{0}?scope={1}&acr_values=Level3&client_id={2}&redirect_uri={3}&response_type=code&ui_locales=nb", _authorizeEndpoint, WebUtility.UrlEncode(_scopes), _issuer, GetRedirectUri(serverPort));
         }
 
         static string GetRedirectUri(int serverPort)

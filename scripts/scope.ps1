@@ -12,7 +12,7 @@
 # ./scope.ps1 update -file definition.json
 # ./scope.ps1 update -definition $definition
 # ./scope.ps1 update -definition $definition
-# ./scope.ps1 export-to-csv -prefix altin
+# ./scope.ps1 export-to-csv -prefix altinn
 # ./scope.ps1 import-from-csv -file somefile.csv
 # ./scope.ps1 export-to-json -prefix altinn
 # 
@@ -135,7 +135,7 @@ function Export-To-CSV {
     if (!(Test-Path "exported")) {
         New-Item -ItemType Directory -Force -Path "exported" | Out-Null
     }
-    $filename = "exported/export-"
+    $filename = "exported/export-" + $env + "-"
     if ($prefix -ne "") {
         $filename += $prefix + "-"
     }
@@ -159,9 +159,15 @@ function ProcessToCsv {
         # We cannot handle arrays in CSV
         $_.allowed_integration_types = [system.String]::Join(",", $_.allowed_integration_types); 
 
-        # delegation_source might be omitted, always include even if not supplied
+        # Some fields might be omitted, always include even if not supplied
         if (!("delegation_source" -in $_.PSobject.Properties.Name)) {
             $_ | Add-Member -NotePropertyName "delegation_source" -NotePropertyValue ""
+        }
+        if (!("authorization_max_lifetime" -in $_.PSobject.Properties.Name)) {
+            $_ | Add-Member -NotePropertyName "authorization_max_lifetime" -NotePropertyValue ""
+        }
+        if (!("long_description" -in $_.PSobject.Properties.Name)) {
+            $_ | Add-Member -NotePropertyName "long_description" -NotePropertyValue ""
         }
 
         [void]$newscopes.Add($_); 
@@ -177,9 +183,19 @@ function ProcessFromCsv {
         # Convert from comma separated list to array
         $_.allowed_integration_types = $_.allowed_integration_types.Split(",");
 
-        # Drop delegation_schemes without value
+        # Drop fields without value
         if ($_.delegation_source -eq "") {
             $_ = $_ | Select-Object -Property * -ExcludeProperty delegation_source
+        }
+        if ($_.authorization_max_lifetime -eq "") {
+            $_ = $_ | Select-Object -Property * -ExcludeProperty authorization_max_lifetime
+        }
+        if ($_.long_description -eq "") {
+            $_ = $_ | Select-Object -Property * -ExcludeProperty long_description
+        }
+        else {
+            # Replace \\n with \n
+            $_.long_description = $_.long_description.Replace('\\n','\n')
         }
 
         [void]$newscopes.Add($_); 

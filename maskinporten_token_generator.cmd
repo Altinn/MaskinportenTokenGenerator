@@ -53,6 +53,7 @@ set authorize_endpoint=
 set person_mode=
 set consumer_org=
 
+
 if ["%~2"]==["test1"] (
 
 	if "%dev_client_id%"=="" (
