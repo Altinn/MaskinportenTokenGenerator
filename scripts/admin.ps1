@@ -111,5 +111,3 @@ elseif ($AddMissing) {
 elseif ($RemoveExtra) {
     Remove-Extra
 }
-
-# Get-ChildItem -Recurse -Path .\imported\scopes\altinn\ -File -Filter *.json | Foreach-Object { Write-Host ".\scope.ps1 update -File" $_.FullName }

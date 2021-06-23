@@ -4,7 +4,12 @@ function IsTokenCacheExpired {
     $token = Get-Content -Path $token_cache
     $parts = $token.Split(".")
     $parts[1] = $parts[1] + ('=' * ($parts[1].Length % 4))
-    $payload = ConvertFrom-JSON([Text.Encoding]::Utf8.GetString([Convert]::FromBase64String($parts[1])))
+    try {
+        $payload = ConvertFrom-JSON([Text.Encoding]::Utf8.GetString([Convert]::FromBase64String($parts[1])))
+    }
+    catch {
+        return $True
+    }
     $date = Get-Date "1/1/1970"
     $validto = $date.AddSeconds($payload.exp).ToLocalTime()
     if ($validto -lt (Get-Date)) {

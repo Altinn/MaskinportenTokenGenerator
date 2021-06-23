@@ -166,6 +166,9 @@ function ProcessToCsv {
         if (!("authorization_max_lifetime" -in $_.PSobject.Properties.Name)) {
             $_ | Add-Member -NotePropertyName "authorization_max_lifetime" -NotePropertyValue ""
         }
+        if (!("at_max_age" -in $_.PSobject.Properties.Name)) {
+            $_ | Add-Member -NotePropertyName "at_max_age" -NotePropertyValue ""
+        }
         if (!("long_description" -in $_.PSobject.Properties.Name)) {
             $_ | Add-Member -NotePropertyName "long_description" -NotePropertyValue ""
         }
@@ -190,7 +193,10 @@ function ProcessFromCsv {
         if ($_.authorization_max_lifetime -eq "") {
             $_ = $_ | Select-Object -Property * -ExcludeProperty authorization_max_lifetime
         }
-        if ($_.long_description -eq "") {
+        if ($_.at_max_age -eq "") {
+            $_ = $_ | Select-Object -Property * -ExcludeProperty at_max_age
+        }
+        if ($_.long_description -eq "" -or $_.long_description -eq $null) {
             $_ = $_ | Select-Object -Property * -ExcludeProperty long_description
         }
         else {
