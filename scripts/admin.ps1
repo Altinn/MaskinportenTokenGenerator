@@ -15,11 +15,13 @@
 [cmdletbinding()]
 param (
     [Parameter(Mandatory=$true)][string]$Env,
+    [Parameter(Mandatory=$false)][string]$Org,
     [Parameter(ParameterSetName="Report")][Switch]$Report,
     [Parameter(ParameterSetName="ShowMissing")][Switch]$ShowMissing,
     [Parameter(ParameterSetName="ShowExtra")][Switch]$ShowExtra,
     [Parameter(ParameterSetName="AddMissing")][Switch]$AddMissing,
-    [Parameter(ParameterSetName="RemoveExtra")][Switch]$RemoveExtrase
+    [Parameter(ParameterSetName="RemoveExtra")][Switch]$RemoveExtra,
+    [Parameter(ParameterSetName="RemoveSingle")][Switch]$RemoveSingle
 )
 
 $ScopeAccess = ($PSScriptRoot + "\scopeaccess.ps1")
@@ -50,6 +52,31 @@ function Generate-Full-Report {
     $report
 }
 
+function Generate-Extra-Report {
+    $report = Generate-Full-Report
+    $serviceOwners = @(Get-ServiceOwners -Env $env | select -ExpandProperty orgnr)
+
+    $extraReport = @{}
+    foreach ($scopeaccess in $report.GetEnumerator()) {
+        $scope = $scopeaccess.Key;
+        foreach ($org in $scopeaccess.Value) {
+            Write-Verbose ("Checking if " + $org + " should have access to " + $scope);
+            if (!$serviceOwners.Contains($org)) {
+                Write-Verbose ($org + " is NOT service owner");
+                if (!$extraReport.ContainsKey($org)) {
+                    $extraReport[$org] = @();
+                }
+                $extraReport[$org] += $scope;
+            }
+            else {
+                Write-Verbose ($org + " is service owner")
+            }
+        }
+    }
+
+    $extraReport
+}
+
 function Generate-Missing-Report {
     $report = Generate-Full-Report
     $serviceOwners = Get-ServiceOwners -Env $env
@@ -74,10 +101,6 @@ function Generate-Missing-Report {
     $missingReport
 }
 
-function Generate-Extra-Report {
-    
-}
-
 function Add-Missing {
     $missingReport = Generate-Missing-Report
 
@@ -88,6 +111,17 @@ function Add-Missing {
         }
     }
 }
+
+function Remove-Single {
+    $report = Generate-Full-Report;
+
+    foreach ($sa in $report.GetEnumerator()) {
+        $scope = $sa.Key;
+        Write-Output ("Removing " + $Org + " access to " + $scope)
+        . $ScopeAccess -env $Env -operator remove -scope $scope -org $Org
+    }
+ }
+
 
 
 if ($Report) {
@@ -110,4 +144,12 @@ elseif ($AddMissing) {
 }
 elseif ($RemoveExtra) {
     Remove-Extra
+}
+elseif ($RemoveSingle) {
+    if ($Org -eq "") {
+        Write-Warning "Must supply -Org"
+    }
+    else {
+       Remove-Single 
+    }
 }
