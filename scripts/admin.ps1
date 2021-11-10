@@ -21,7 +21,8 @@ param (
     [Parameter(ParameterSetName="ShowExtra")][Switch]$ShowExtra,
     [Parameter(ParameterSetName="AddMissing")][Switch]$AddMissing,
     [Parameter(ParameterSetName="RemoveExtra")][Switch]$RemoveExtra,
-    [Parameter(ParameterSetName="RemoveSingle")][Switch]$RemoveSingle
+    [Parameter(ParameterSetName="RemoveSingle")][Switch]$RemoveSingle,
+    [Parameter(ParameterSetName="AddSingle")][Switch]$AddSingle
 )
 
 $ScopeAccess = ($PSScriptRoot + "\scopeaccess.ps1")
@@ -120,7 +121,18 @@ function Remove-Single {
         Write-Output ("Removing " + $Org + " access to " + $scope)
         . $ScopeAccess -env $Env -operator remove -scope $scope -org $Org
     }
+}
+
+function Add-Single {
+    $report = Generate-Full-Report;
+
+    foreach ($sa in $report.GetEnumerator()) {
+        $scope = $sa.Key;
+        Write-Output ("Adding " + $Org + " access to " + $scope)
+        . $ScopeAccess -env $Env -operator add -scope $scope -org $Org
+    }
  }
+
 
 
 
@@ -151,5 +163,13 @@ elseif ($RemoveSingle) {
     }
     else {
        Remove-Single 
+    }
+}
+elseif ($AddSingle) {
+    if ($Org -eq "") {
+        Write-Warning "Must supply -Org"
+    }
+    else {
+       Add-Single 
     }
 }
