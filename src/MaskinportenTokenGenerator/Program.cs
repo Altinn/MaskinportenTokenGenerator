@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -14,10 +15,11 @@ namespace MaskinportenTokenGenerator
         private static string _certificateThumbPrint;
         private static string _p12KeyStoreFile;
         private static string _p12KeyStorePassword;
+        private static string _jwkFile;
         private static string _kidClaim;
         private static string _issuer;
         private static string _audience;
-        private static string _resource = null;
+        private static string _resource;
         private static string _scopes;
         private static string _tokenEndpoint;
         private static string _authorizeEndpoint;
@@ -41,6 +43,8 @@ namespace MaskinportenTokenGenerator
                     v => _p12KeyStoreFile = v },
                 { "p=|keystore_password=", "Path to PKCS12 file containing certificate to use.",
                     v => _p12KeyStorePassword = v },
+                { "j=|jwk_path=", "Path to JSON file containing JWK with public/private key.",
+                    v => _jwkFile = v },
                 { "K=|kid=", "Set kid-claim in bearer grant assertion header. Used for pre-registered JWK clients.",
                     v => _kidClaim = v },
                 { "c=|client_id=", "This is the client_id to which the access_token is requested",
@@ -112,6 +116,10 @@ namespace MaskinportenTokenGenerator
             try {
                 if (_certificateThumbPrint != null) {
                     tokenHandler = new TokenHandler(_certificateThumbPrint, _kidClaim, _tokenEndpoint, _audience, _resource, _scopes, _issuer, _tokenTtl, _consumerOrg);
+                }
+                else if (_jwkFile != null)
+                {
+                    tokenHandler = new TokenHandler(_jwkFile, false, _kidClaim, _tokenEndpoint, _audience, _resource, _scopes, _issuer, _tokenTtl, _consumerOrg);
                 }
                 else
                 {
@@ -218,9 +226,9 @@ namespace MaskinportenTokenGenerator
         {
             var hasErrors = false;
 
-            if (_certificateThumbPrint == null && _p12KeyStoreFile == null || _certificateThumbPrint != null && _p12KeyStoreFile != null)
+            if (_certificateThumbPrint == null && _p12KeyStoreFile == null && _jwkFile == null || new [] { _certificateThumbPrint, _p12KeyStoreFile, _jwkFile }.Count(b => b != null) != 1)
             {
-                Console.WriteLine("Requires either --certificate_thumbprint or --keystore_path");
+                Console.WriteLine("Requires exactly one of either --certificate_thumbprint or --keystore_path or --jwk_path");
                 hasErrors = true;
             }
 

@@ -6,11 +6,14 @@
 :: The thumbprint for your own enterprise certificate in local machine storage
 set production_certificate_thumbprint=
 
-:: Alternative to cert thumbprint; the path to a PKCS#12 file containing a certificate used to sign the request
+:: Or alternatively; the path to a PKCS#12 file containing a certificate used to sign the request
 ::set production_keystore_path=
 
 :: Password to the key store. Make sure you escape correctly.
 ::set production_keystore_password=
+
+:: Or alternatively; the path to a JWK file containing the public/private key used to sign the request
+::set production_jwk_path=
 
 :: If authenticating with a pre-registered key, the kid used as identifier must be included in the assertion. If not supplied, falls back to thumbprint (same as x5t).
 ::set production_kid=
@@ -45,6 +48,7 @@ set production_consumer_org=
 set test_certificate_thumbprint=
 ::set test_keystore_path=
 ::set test_keystore_password=
+::set test_jwk_path=
 ::set test_kid=
 set test_client_id=
 set test_resource=
@@ -55,10 +59,11 @@ set test_authorize_endpoint=https://oidc-ver2.difi.no/idporten-oidc-provider/aut
 set test_person_mode=false
 set test_consumer_org=
 
-:: --------- TEST1 (for DEV) SETTINGS -----------
+:: --------- TEST1 (for DEV) SETTINGS. This is only for internal use, you probably want VER2 -----------
 set dev_certificate_thumbprint=
 ::set dev_keystore_path=
 ::set dev_keystore_password=
+::set dev_jwk_path=
 ::set dev_kid=
 set dev_client_id=
 set dev_resource=

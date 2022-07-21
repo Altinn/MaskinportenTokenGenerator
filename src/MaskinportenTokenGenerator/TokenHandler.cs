@@ -5,7 +5,6 @@ using System.IO;
 using System.Net;
 using System.Net.Http;
 using System.Security.Cryptography.X509Certificates;
-using System.Windows.Forms;
 using Microsoft.IdentityModel.Tokens;
 
 namespace MaskinportenTokenGenerator
@@ -20,6 +19,7 @@ namespace MaskinportenTokenGenerator
         private readonly string _tokenEndpoint;
         private readonly int _tokenTtl;
         private readonly X509Certificate2 _signingCertificate;
+        private readonly SecurityKey _signingKey;
         private readonly string _kidClaim;
         private readonly string _consumerOrg;
 
@@ -47,6 +47,28 @@ namespace MaskinportenTokenGenerator
         {
             _signingCertificate = new X509Certificate2();
             _signingCertificate.Import(File.ReadAllBytes(p12KeyStoreFile), p12KeyStorePassword, X509KeyStorageFlags.MachineKeySet | X509KeyStorageFlags.PersistKeySet | X509KeyStorageFlags.Exportable);
+
+            _kidClaim = kidClaim;
+            _tokenEndpoint = tokenEndpoint;
+            _audience = audience;
+            _resource = resource;
+            _scopes = scopes;
+            _issuer = issuer;
+            _tokenTtl = tokenTtl;
+            _consumerOrg = consumerOrg;
+        }
+
+        public TokenHandler(string jwkJsonFile, bool isKeySetFormat, string kidClaim, string tokenEndpoint, string audience, string resource,
+            string scopes, string issuer, int tokenTtl, string consumerOrg)
+        {
+            if (isKeySetFormat)
+            {
+                throw new NotImplementedException();
+            }
+            else
+            {
+                _signingKey = new JsonWebKey(File.ReadAllText(jwkJsonFile));
+            }
 
             _kidClaim = kidClaim;
             _tokenEndpoint = tokenEndpoint;
@@ -113,14 +135,28 @@ namespace MaskinportenTokenGenerator
         public string GetJwtAssertion()
         {
             var dateTimeOffset = new DateTimeOffset(DateTime.UtcNow);
-
-            var securityKey = new X509SecurityKey(_signingCertificate);
-            var header = new JwtHeader(new SigningCredentials(securityKey, SecurityAlgorithms.RsaSha256))
+            JwtHeader header;
+            if (_signingCertificate != null)
             {
-                {"x5c", new List<string>() {Convert.ToBase64String(_signingCertificate.GetRawCertData())}}
-            };
-            header.Remove("typ");
-
+                var securityKey = new X509SecurityKey(_signingCertificate);
+                header = new JwtHeader(new SigningCredentials(securityKey, SecurityAlgorithms.RsaSha256))
+                {
+                    { "x5c", new List<string>() { Convert.ToBase64String(_signingCertificate.GetRawCertData()) } }
+                };
+                header.Remove("typ");
+            }
+            else if (_signingKey != null)
+            {
+                // TODO! We always assume RS256
+                header = new JwtHeader(new SigningCredentials(_signingKey, SecurityAlgorithms.RsaSha256));
+                header.Remove("typ");
+            }
+            else
+            {
+                throw new ArgumentException(
+                    "Internal error: expected either _signingCertificate or _signingKey to be non-null");
+            }
+ 
             // kid claim by default is set to x5t (certificate thumbprint). This can only be supplied if 
             // the client is configured with a custom public key, and must be removed if signing the assertion 
             // with a enterprise certificate. For convenience, the magic value "thumbprint" allows the 

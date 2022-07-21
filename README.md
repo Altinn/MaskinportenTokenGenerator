@@ -6,7 +6,8 @@ This is a utilty for helping out with generating access_tokens from ID/Maskinpor
 * A recent Windows and Visual Studio 2017 or newer for building
 * Either
 	* A enterprise certificate owned installed owned by the organization that has been given access to one or more scopes in machineporten
-	* A password-protected PKCS#12 file containing the public/private key pair. Used if the client has been configured with a pre-configured key.
+	* A JSON file containing a JWK. Used if the client has been configured with a pre-configured key. See https://mkjwk.org/ for examples on how to construct JWKs. NOTE! As of now only RS256 algorithm is supported.
+	* A password-protected PKCS#12 file containing the public/private key pair. Can also be used if the client has been configured with a pre-configured key.	
 * A client id for an integration in Maskinporten provisioned with one or more scopes
 
 ## Building

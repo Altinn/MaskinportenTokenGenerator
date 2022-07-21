@@ -43,6 +43,7 @@ if exist "%local_config%" (
 set certificate_thumbprint=
 set keystore_path=
 set keystore_password=
+set jwk_path=
 set kid=
 set client_id=
 set resource=
@@ -65,6 +66,7 @@ if ["%~2"]==["test1"] (
 	set certificate_thumbprint=%dev_certificate_thumbprint%
 	set keystore_path=%dev_keystore_path%
 	set keystore_password=%dev_keystore_password%
+	set jwk_path=%dev_jwk_path%
 	set kid=%dev_kid%
 	set client_id=%dev_client_id%
 	set resource=%dev_resource%
@@ -87,6 +89,7 @@ if ["%~2"]==["ver2"] (
 	set certificate_thumbprint=%test_certificate_thumbprint%
 	set keystore_path=%test_keystore_path%
 	set keystore_password=%test_keystore_password%
+	set jwk_path=%test_jwk_path%
 	set kid=%test_kid%
 	set client_id=%test_client_id%
 	set resource=%test_resource%
@@ -108,6 +111,7 @@ if ["%~2"]==["prod"] (
 	set certificate_thumbprint=%production_certificate_thumbprint%
 	set keystore_path=%production_keystore_path%
 	set keystore_password=%production_keystore_password%
+	set jwk_path=%production_jwk_path%
 	set kid=%production_kid%
 	set client_id=%production_client_id%
 	set resource=%production_resource%
@@ -134,6 +138,11 @@ if not ["%keystore_path%"]==[""] (
 	set keystore_opt=--keystore_path=%keystore_path% --keystore_password=%keystore_password%
 )
 
+set jwk_path_opt=
+if not ["%jwk_path%"]==[""] (
+	set jwk_path_opt=--jwk_path=%jwk_path%
+)
+
 set kid_opt=
 if not ["%kid%"]==[""] (
 	set kid_opt=--kid=%kid%	
@@ -149,7 +158,7 @@ if not ["%consumer_org%"]==[""] (
 	set consumer_org_opt=--consumer_org=%consumer_org%
 )
 
-set cmd=%MPEXE% --client_id=%client_id% --audience=%audience% --token_endpoint=%token_endpoint% --authorize_endpoint=%authorize_endpoint% --scopes=%scopes% %only_token_opt% %person_mode_opt% %server_mode_opt% %resource_opt% %certificate_thumbprint_opt% %keystore_opt% %kid_opt% %consumer_org_opt%
+set cmd=%MPEXE% --client_id=%client_id% --audience=%audience% --token_endpoint=%token_endpoint% --authorize_endpoint=%authorize_endpoint% --scopes=%scopes% %only_token_opt% %person_mode_opt% %server_mode_opt% %resource_opt% %certificate_thumbprint_opt% %keystore_opt% %jwk_path_opt% %kid_opt% %consumer_org_opt%
 if ["%only_token_opt%"]==[""] (
 	echo -------------------------------
 	echo %cmd%

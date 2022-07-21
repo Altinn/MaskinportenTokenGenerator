@@ -5,6 +5,7 @@
 scripts/serviceowners.local.json
 scripts/exported
 scripts/imported
+secrets
 
 
 ### VisualStudio ###
