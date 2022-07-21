@@ -45,7 +45,8 @@ Here "BearerToken" is an environment variable, which can be put in the "Token"-f
 MIT
 
 ## Changelog (since Sep. 2020)
+* 2022-07-21: Add support for supplying a JWK-file instead of PKCS#12 for self-generated keys
+* 2020-11-13: Bugfixes and refactorings
 * 2020-10-16: Added support for [supplier integrations](https://difi.github.io/felleslosninger/maskinporten_guide_apikonsument.html#bruke-delegering-som-leverand%C3%B8r) for delegated Maskinporten scopes
 * 2020-09-15: Added preliminary support for ID-porten personal login / authcode flow
 * 2020-09-15: Added scripts for managing scope access
-* 2020-11-13: Bugfixes and refactorings, 
