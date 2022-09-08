@@ -5,7 +5,7 @@
 # -----------------------------------------------------------------------------------------------------------------
 #
 # Examples: 
-# ./admin.ps1 -Env ver2 -Report         --> Generates a report showing all orgs having access to a scope
+# ./admin.ps1 -Env ver2 -Report        --> Generates a report showing all orgs having access to a scope
 # ./admin.ps1 -Env ver2 -ShowMissing   --> List all serviceowners missing scope access
 # ./admin.ps1 -Env ver2 -ShowExtra     --> List all scopes having orgs with access that are not serviceowners
 # ./admin.ps1 -Env ver2 -AddMissing    --> Grant service owners access to missing scopes, if any
