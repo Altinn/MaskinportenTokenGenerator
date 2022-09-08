@@ -1,8 +1,8 @@
-# MaskinportenPortenTokenGenerator - scopes administration scripts
+# Scope administration scripts
 
 This directory contains scripts that can be useful for performing/automating various administrative tasks related to ID/Maskinporten.
 
-> Warning! This is a tool with sharp edges, capable of messing up your Maskinporten scope and access setup.
+> Warning! These are tools with sharp edges, capable of messing up your Maskinporten scope and access setup.
 > Use with extreme care!
 
 ## Setup
