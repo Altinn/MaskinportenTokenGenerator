@@ -2,6 +2,9 @@
 
 This directory contains scripts that can be useful for performing/automating various administrative tasks related to ID/Maskinporten.
 
+> Warning! This is a tool with sharp edges, capable of messing up your Maskinporten scope and access setup.
+> Use with extreme care!
+
 ## Setup
 
 Copy `scopes-admin-config.cmd` to `scopes-admin-config.local.cmd` and fill in credentials for a Maskinporten- client with `idporten:scopes.write` scope.
