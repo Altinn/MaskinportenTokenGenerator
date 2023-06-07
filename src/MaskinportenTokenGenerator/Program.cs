@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Net;
+using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Mono.Options;
@@ -33,12 +34,15 @@ namespace MaskinportenTokenGenerator
             var serverMode = false;
             var onlyToken = false;
             var onlyGrant = false;
-            int serverPort = 17823;
-            bool personMode = false;
+            var serverPort = 17823;
+            var personMode = false;
+            var useCurrentUserStoreLocation = false;
 
             var p = new OptionSet() {
-                { "t=|certificate_thumbprint=", "Thumbprint for certificate to use, see Cert:\\LocalMachine\\My in Powershell.",
+                { "t=|certificate_thumbprint=", "Thumbprint for certificate to use, see Cert:\\{LocalMachine,CurrentUser}\\My in Powershell.",
                     v => _certificateThumbPrint = v },
+                { "u=|use_current_user_store_location=", "User CurrentUser certificate store location (default: LocalMachine)", 
+                    v => useCurrentUserStoreLocation = v != null && v == "true" },
                 { "k=|keystore_path=", "Path to PKCS12 file containing certificate to use.",
                     v => _p12KeyStoreFile = v },
                 { "p=|keystore_password=", "Path to PKCS12 file containing certificate to use.",
@@ -81,7 +85,7 @@ namespace MaskinportenTokenGenerator
                         }
                     }
                 },
-                { "i|person_mode=",  "Enable person mode (ID-porten)",
+                { "i=|person_mode=",  "Enable person mode (ID-porten)",
                     v => personMode = v != null && v == "true" },
                 { "o|only_token", "Only return token to stdout", 
                     v => onlyToken = v != null },
@@ -115,7 +119,8 @@ namespace MaskinportenTokenGenerator
             TokenHandler tokenHandler;
             try {
                 if (_certificateThumbPrint != null) {
-                    tokenHandler = new TokenHandler(_certificateThumbPrint, _kidClaim, _tokenEndpoint, _audience, _resource, _scopes, _issuer, _tokenTtl, _consumerOrg);
+                    var storeLocation = useCurrentUserStoreLocation ? StoreLocation.CurrentUser : StoreLocation.LocalMachine;
+                    tokenHandler = new TokenHandler(_certificateThumbPrint, storeLocation, _kidClaim, _tokenEndpoint, _audience, _resource, _scopes, _issuer, _tokenTtl, _consumerOrg);
                 }
                 else if (_jwkFile != null)
                 {

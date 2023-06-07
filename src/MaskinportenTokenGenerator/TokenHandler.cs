@@ -27,10 +27,10 @@ namespace MaskinportenTokenGenerator
         public Exception LastException { get; private set; }
         public string CurlDebugCommand { get; private set; }
 
-        public TokenHandler(string certificateThumbprint, string kidClaim, string tokenEndpoint, string audience, string resource,
+        public TokenHandler(string certificateThumbprint, StoreLocation certificateStoreLocation, string kidClaim, string tokenEndpoint, string audience, string resource,
             string scopes, string issuer, int tokenTtl, string consumerOrg)
         {
-            _signingCertificate = GetCertificateFromKeyStore(certificateThumbprint, StoreName.My, StoreLocation.LocalMachine);
+            _signingCertificate = GetCertificateFromKeyStore(certificateThumbprint, StoreName.My, certificateStoreLocation);
 
             _kidClaim = kidClaim;
             _tokenEndpoint = tokenEndpoint;

@@ -14,12 +14,12 @@ This is a utilty for helping out with generating access_tokens from ID/Maskinpor
 Open a Visual Studio 2017 or newer commandline environment, and run `msbuild` in the `src`-directory, or open the solution file and build within Visual Studio.
 
 ## Usage
-1. Copy `config.cmd` to `config.local.cmd` and configure the production and/or VER2-settings 
+1. Copy `config.cmd` to `config.local.cmd` and configure the production and/or TEST-settings 
 2. Run either of the following utility scripts:
 	* `get_${env}_token` Gets a access_token and places it on the clipboard (for easy pasting in Postman etc)
 	* `start_${env}_token_server` Starts a simple HTTP-server listening on all interfaces on port 17823 by default. Any GET-request to `http://localhost:17823` will attempt to fetch a access_token from Maskinporten and proxy the response.
 
-You can keep multiple configuration files for various settings, and can pass those as a single parameter to the scripts, like `start_ver2_token_server config.local.my-custom-config.cmd` 
+You can keep multiple configuration files for various settings, and can pass those as a single parameter to the scripts, like `start_test_token_server config.local.my-custom-config.cmd` 
 
 This can also be done by dragging and dropping the custom config-file over the script you want to run.
 
@@ -45,6 +45,7 @@ Here "BearerToken" is an environment variable, which can be put in the "Token"-f
 MIT
 
 ## Changelog (since Sep. 2020)
+* 2023-06-07: Set new "test" environment as default replacing "ver2". 
 * 2022-07-21: Add support for supplying a JWK-file instead of PKCS#12 for self-generated keys
 * 2020-11-13: Bugfixes and refactorings
 * 2020-10-16: Added support for [supplier integrations](https://difi.github.io/felleslosninger/maskinporten_guide_apikonsument.html#bruke-delegering-som-leverand%C3%B8r) for delegated Maskinporten scopes

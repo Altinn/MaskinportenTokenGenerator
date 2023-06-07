@@ -53,12 +53,13 @@ set token_endpoint=
 set authorize_endpoint=
 set person_mode=
 set consumer_org=
+set use_current_user_store_location=
 
 
-if ["%~2"]==["test1"] (
+if ["%~2"]==["dev"] (
 
 	if "%dev_client_id%"=="" (
-		echo Missing configuration for TEST1/DEV environment. Check the configuration, and make sure that any config.local.cmd is up-to-date with fields defined in config.cmd
+		echo Missing configuration for DEV environment. Check the configuration, and make sure that any config.local.cmd is up-to-date with fields defined in config.cmd
 		pause
 		exit /b 1
 	)
@@ -76,12 +77,13 @@ if ["%~2"]==["test1"] (
 	set authorize_endpoint=%dev_authorize_endpoint%
 	set person_mode=%dev_person_mode%
 	set consumer_org=%dev_consumer_org%
+	set use_current_user_store_location=%dev_use_current_user_store_location%
 )
 
-if ["%~2"]==["ver2"] (
+if ["%~2"]==["test"] (
 
 	if "%test_client_id%"=="" (
-		echo Missing configuration for VER2/ATxx/TT02 environment. Check the configuration, and make sure that any config.local.cmd is up-to-date with fields defined in config.cmd
+		echo Missing configuration for TEST/ATxx/TT02 environment. Check the configuration, and make sure that any config.local.cmd is up-to-date with fields defined in config.cmd
 		pause
 		exit /b 1
 	)
@@ -99,6 +101,7 @@ if ["%~2"]==["ver2"] (
 	set authorize_endpoint=%test_authorize_endpoint%
 	set person_mode=%test_person_mode%
 	set consumer_org=%test_consumer_org%
+	set use_current_user_store_location=%test_use_current_user_store_location%
 )
 
 if ["%~2"]==["prod"] (
@@ -121,6 +124,7 @@ if ["%~2"]==["prod"] (
 	set authorize_endpoint=%production_authorize_endpoint%
 	set person_mode=%production_person_mode%
 	set consumer_org=%prod_consumer_org%
+	set use_current_user_store_location=%prod_use_current_user_store_location%
 )
 
 set resource_opt=
@@ -158,7 +162,12 @@ if not ["%consumer_org%"]==[""] (
 	set consumer_org_opt=--consumer_org=%consumer_org%
 )
 
-set cmd=%MPEXE% --client_id=%client_id% --audience=%audience% --token_endpoint=%token_endpoint% --authorize_endpoint=%authorize_endpoint% --scopes=%scopes% %only_token_opt% %person_mode_opt% %server_mode_opt% %resource_opt% %certificate_thumbprint_opt% %keystore_opt% %jwk_path_opt% %kid_opt% %consumer_org_opt%
+set use_current_user_store_location_opt=
+if not ["%use_current_user_store_location%"]==[""] (
+	set use_current_user_store_location_opt=--use_current_user_store_location=%use_current_user_store_location%
+)
+
+set cmd=%MPEXE% --client_id=%client_id% --audience=%audience% --token_endpoint=%token_endpoint% --authorize_endpoint=%authorize_endpoint% --scopes=%scopes% %only_token_opt% %person_mode_opt% %server_mode_opt% %resource_opt% %certificate_thumbprint_opt% %keystore_opt% %jwk_path_opt% %kid_opt% %consumer_org_opt% %use_current_user_store_location_opt%
 if ["%only_token_opt%"]==[""] (
 	echo -------------------------------
 	echo %cmd%
