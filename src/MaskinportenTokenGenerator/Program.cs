@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Linq;
 using System.Net;
+using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
+using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Mono.Options;
@@ -26,6 +28,7 @@ namespace MaskinportenTokenGenerator
         private static string _authorizeEndpoint;
         private static int _tokenTtl = 120;
         private static string _consumerOrg;
+        private static string _codeVerifier;
 
         [STAThread]
         static void Main(string[] args)
@@ -190,10 +193,11 @@ namespace MaskinportenTokenGenerator
 
             if (personMode)
             {
-                string url = GetAuthorizeUrl(serverPort);
+                _codeVerifier = GenerateCodeVerifier();
+                string url = GetAuthorizeUrl(serverPort, GeneratePkceChallenge(_codeVerifier));
                 Console.WriteLine("Person login mode, opening browser to: " + url);
                 System.Diagnostics.Process.Start(url);
-                server = new Server(tokenHandler, serverPort, _issuer, GetRedirectUri(serverPort));
+                server = new Server(tokenHandler, serverPort, _issuer, GetRedirectUri(serverPort), _codeVerifier);
             }
             else
             {
@@ -266,14 +270,49 @@ namespace MaskinportenTokenGenerator
             Environment.Exit(1);
         }
 
-        static string GetAuthorizeUrl(int serverPort)
+        static string GetAuthorizeUrl(int serverPort, string codeChallenge)
         {
-            return string.Format("{0}?scope={1}&acr_values=Level3&client_id={2}&redirect_uri={3}&response_type=code&resource={4}&ui_locales=nb", _authorizeEndpoint, WebUtility.UrlEncode(_scopes), _issuer, GetRedirectUri(serverPort), WebUtility.UrlEncode(_resource));
+            var url = string.Format("{0}?scope={1}&acr_values=idporten-loa-substantial&client_id={2}&redirect_uri={3}&response_type=code&ui_locales=nb&code_challenge={4}&code_challenge_method=S256", _authorizeEndpoint, WebUtility.UrlEncode(_scopes), _issuer, WebUtility.UrlEncode(GetRedirectUri(serverPort)), codeChallenge);
+            if (_resource != null)
+            {
+                url += "&resource=" + WebUtility.UrlEncode(_resource);
+            }
+
+            return url;
+        }
+
+        static string GenerateCodeVerifier()
+        {
+            int length = 64;
+            const string availableChars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
+            char[] chars = new char[length];
+            Random random = new Random();
+
+            for (int i = 0; i < length; i++)
+            {
+                chars[i] = availableChars[random.Next(0, availableChars.Length)];
+            }
+
+            return new string(chars);
+        }
+
+        public static string GeneratePkceChallenge(string text)
+        {
+            byte[] bytes = Encoding.ASCII.GetBytes(text);
+            SHA256Managed hashString = new SHA256Managed();
+            byte[] hash = hashString.ComputeHash(bytes);
+
+            string base64UrlHash = Convert.ToBase64String(hash);
+            base64UrlHash = base64UrlHash.Replace('+', '-');
+            base64UrlHash = base64UrlHash.Replace('/', '_');
+            base64UrlHash = base64UrlHash.Split('=')[0];
+
+            return base64UrlHash;
         }
 
         static string GetRedirectUri(int serverPort)
         {
-            return WebUtility.UrlEncode("http://localhost:" + serverPort.ToString() + "/response");
+            return "http://localhost:" + serverPort.ToString() + "/response";
         }
     }
 }

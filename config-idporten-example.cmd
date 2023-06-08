@@ -16,7 +16,7 @@ set test_scopes="difitest:altinneus"
 set test_audience=https://test.idporten.no
 
 :: Endpoint for token
-set test_token_endpoint=https://login.test.idporten.no/authorize
+set test_token_endpoint=https://test.idporten.no/token
 
 :: Endpoint for authorization (person mode)
 set test_authorize_endpoint=https://login.test.idporten.no/authorize

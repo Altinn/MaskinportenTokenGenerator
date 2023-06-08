@@ -80,7 +80,7 @@ namespace MaskinportenTokenGenerator
             _consumerOrg = consumerOrg;
         }
 
-        public string GetTokenFromAuthCodeGrant(string assertion, string code, string clientId, string redirectUri, out bool isError)
+        public string GetTokenFromAuthCodeGrant(string assertion, string code, string clientId, string redirectUri, string codeVerifier, out bool isError)
         {
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
 
@@ -89,10 +89,10 @@ namespace MaskinportenTokenGenerator
                 new KeyValuePair<string, string>("client_id", clientId),
                 new KeyValuePair<string, string>("grant_type", "authorization_code"),
                 new KeyValuePair<string, string>("code", code),
-                // FIXME! This somehow breaks with an error claiming that the redirectUri does not match
-                //new KeyValuePair<string, string>("redirect_uri", redirectUri),
+                new KeyValuePair<string, string>("redirect_uri", redirectUri),
+                new KeyValuePair<string, string>("code_verifier", codeVerifier),
                 new KeyValuePair<string, string>("client_assertion_type", "urn:ietf:params:oauth:client-assertion-type:jwt-bearer"),
-                new KeyValuePair<string, string>("client_assertion", assertion),
+                new KeyValuePair<string, string>("client_assertion", assertion)
             });
 
             LastTokenRequest = formContent.ReadAsStringAsync().Result;
@@ -174,13 +174,18 @@ namespace MaskinportenTokenGenerator
             var payload = new JwtPayload
             {
                 { "aud", _audience },
-                { "resource", _resource },
                 { "scope", _scopes },
+                { "sub", _issuer }, // See https://docs.digdir.no/docs/idporten/oidc/oidc_protocol_token.html#client-authentication-using-jwt-token
                 { "iss", _issuer },
                 { "exp", dateTimeOffset.ToUnixTimeSeconds() + _tokenTtl },
                 { "iat", dateTimeOffset.ToUnixTimeSeconds() },
                 { "jti", Guid.NewGuid().ToString() },
             };
+
+            if (_resource != null)
+            {
+                payload.Add("resource", _resource);
+            }
 
             if (_consumerOrg != null) {
                 payload.Add("consumer_org", _consumerOrg);

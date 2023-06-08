@@ -9,6 +9,7 @@ namespace MaskinportenTokenGenerator
     {
         private HttpListener _listener;
         private int _port;
+        private string _codeVerifier;
         private TokenHandler _tokenHandler;
         private static string _cachedToken = null;
         private static DateTime _cachedTokenTtl = DateTime.Now;
@@ -16,10 +17,11 @@ namespace MaskinportenTokenGenerator
         private string _clientId = null;
         private string _redirectUri = null;
 
-        public Server(TokenHandler token, int port, string clientId = null, string redirectUri = null)
+        public Server(TokenHandler token, int port, string clientId = null, string redirectUri = null, string codeVerifier = null)
         {
             _tokenHandler = token;
             _port = port;
+            _codeVerifier = codeVerifier;
             _clientId = clientId;
             _redirectUri = redirectUri;
         }
@@ -27,7 +29,7 @@ namespace MaskinportenTokenGenerator
         public void Listen()
         {
             _listener = new HttpListener();
-            _listener.Prefixes.Add("http://*:" + _port.ToString() + "/");
+            _listener.Prefixes.Add("http://localhost:" + _port.ToString() + "/");
             _listener.Start();
 
             while (true)
@@ -86,7 +88,7 @@ namespace MaskinportenTokenGenerator
                 assertion = _tokenHandler.GetJwtAssertion();
                 if (_authCode != null)
                 {
-                    accessToken = _tokenHandler.GetTokenFromAuthCodeGrant(assertion, _authCode, _clientId, _redirectUri, out isError);
+                    accessToken = _tokenHandler.GetTokenFromAuthCodeGrant(assertion, _authCode, _clientId, _redirectUri, _codeVerifier, out isError);
                 }
                 else
                 {
@@ -115,7 +117,7 @@ namespace MaskinportenTokenGenerator
                 if (_tokenHandler.LastTokenRequest != null) {
                     Console.WriteLine("Token Request:");
                     Console.WriteLine("---------------");
-                    Console.WriteLine(_tokenHandler.LastTokenRequest);
+                    Console.WriteLine(_tokenHandler.LastTokenRequest.Replace('&','\n'));
                     Console.WriteLine("---------------");
                 }
             }
@@ -158,7 +160,7 @@ namespace MaskinportenTokenGenerator
                 context.Response.AddHeader("Location", "/?cache=true");
             }
 
-            context.Response.OutputStream.Close();           
+            context.Response.OutputStream.Close();
         }
     }
 }
