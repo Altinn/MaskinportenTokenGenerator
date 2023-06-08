@@ -3,8 +3,11 @@
 :: 
 
 :: --------- PRODUCTION SETTINGS -----------
-:: The thumbprint for your own enterprise certificate in local machine storage
+:: The thumbprint for your own enterprise certificate in local machine storage (Cert:\LocalMachine\My)
 set production_certificate_thumbprint=
+
+:: If you want to use CurrentUser certificate store location instead (Cert:\CurrentUser\My)
+set production_use_current_user_store_location=true
 
 :: Or alternatively; the path to a PKCS#12 file containing a certificate used to sign the request
 ::set production_keystore_path=
@@ -46,6 +49,7 @@ set production_consumer_org=
 
 :: --------- TEST (for ATxx/TT02) SETTINGS -----------
 set test_certificate_thumbprint=
+::set test_use_current_user_store_location=true
 ::set test_keystore_path=
 ::set test_keystore_password=
 ::set test_jwk_path=
@@ -66,6 +70,7 @@ set test_consumer_org=
 
 :: --------- DEV SETTINGS. This is only for internal/experimental use, you probably want TEST -----------
 set dev_certificate_thumbprint=
+::set dev_use_current_user_store_location=true
 ::set dev_keystore_path=
 ::set dev_keystore_password=
 ::set dev_jwk_path=
