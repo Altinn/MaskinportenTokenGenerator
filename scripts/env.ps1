@@ -1,4 +1,4 @@
-$validenv = "test1", "ver1", "ver2", "prod"
+$validenv = "ver2", "prod", "test"
 
 if ($validenv -notcontains $env) {
     Write-Error ("Invalid env supplied. Valid environments: " + $validenv) 
@@ -9,8 +9,12 @@ if ($env -eq "prod") {
     $envurl = "https://integrasjon.difi.no"
 }
 else {
-    $envurl = "https://integrasjon-$env.difi.no"
-
+    if ($validenv -eq "test") {
+        $envurl = "https://integrasjon-ver2.difi.no"    
+    }
+    else {
+        $envurl = "https://integrasjon-$env.difi.no"
+    }
 }
 
 #$envurl = "http://localhost:8000"
@@ -29,7 +33,8 @@ function Invoke-API {
     }
     catch {
         Write-Warning "Request $verb $url failed"
-        Write-Warning ("Server gave status code: " + $_.Exception.Response.StatusCode + " " + $_.Exception.Response.ReasonPhrase)
+        #Write-Warning ("Server gave status code: " + $_.Exception.Response.StatusCode + " " + $_.Exception.Response.ReasonPhrase)
+        $_ | Format-List -Property * | Out-String | Write-Warning
         Exit 1
     }
 

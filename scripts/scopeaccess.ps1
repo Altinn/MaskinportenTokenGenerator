@@ -11,13 +11,13 @@
 # ./scopeaccess.ps1 remove someprefix:somescope 912345678   -> Revoke 912345678 access to someprefix:somescope
 # ./scopeaccess.ps1 add someprefix:somescope 912345678      -> Grant 912345678 access to someprefix:somescope
 # 
-# Environment defaults to "VER2". Can be overridden by supplying a fourth positional or -env parameter containing "test1", "ver1", ver2" or "prod"
+# Environment defaults to "TEST". Can be overridden by supplying a fourth positional or -env parameter containing "test" or "prod"
 
 param (
     [Parameter(Mandatory=$true)][string]$operator,
     [Parameter()][string]$scope,
     [Parameter()][string]$org,
-    [Parameter()][string]$env = "ver2"
+    [Parameter()][string]$env = "test"
 )
 
 . ($PSScriptRoot + "/config.ps1")

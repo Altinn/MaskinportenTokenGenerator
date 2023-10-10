@@ -14,18 +14,10 @@ set production_client_id=someclientid
 :: The scopes you want in your access token
 set production_scopes="idporten:scopes.write"
 
-:: The aud claim for the bearer grant assertion. Used as issuer claim in returned token
-set production_audience=https://oidc.difi.no/idporten-oidc-provider/
-
-:: The URL for the token endpoint
-set production_token_endpoint=https://oidc.difi.no/idporten-oidc-provider/token
-
-:: --------- VER2 SETTINGS -----------
+:: --------- TETS SETTINGS -----------
 :: The path to a PKCS#12 file containing a certificate used to sign the request
-set test_keystore_path=C:\somepathto\keystore-ver2.p12
+set test_keystore_path=C:\somepathto\keystore-test.p12
 set test_keystore_password=somepassword
 set test_kid=somekid
 set test_client_id=someclientid
 set test_scopes="idporten:scopes.write"
-set test_audience=https://oidc-ver2.difi.no/idporten-oidc-provider/
-set test_token_endpoint=https://oidc-ver2.difi.no/idporten-oidc-provider/token
