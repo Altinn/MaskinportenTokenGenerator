@@ -45,8 +45,10 @@ namespace MaskinportenTokenGenerator
         public TokenHandler(string p12KeyStoreFile, string p12KeyStorePassword, string kidClaim, string tokenEndpoint, string audience, string resource,
             string scopes, string issuer, int tokenTtl, string consumerOrg)
         {
-            _signingCertificate = new X509Certificate2();
-            _signingCertificate.Import(File.ReadAllBytes(p12KeyStoreFile), p12KeyStorePassword, X509KeyStorageFlags.MachineKeySet | X509KeyStorageFlags.PersistKeySet | X509KeyStorageFlags.Exportable);
+            _signingCertificate = new X509Certificate2(
+                File.ReadAllBytes(p12KeyStoreFile),
+                p12KeyStorePassword,
+                X509KeyStorageFlags.MachineKeySet | X509KeyStorageFlags.PersistKeySet | X509KeyStorageFlags.Exportable);
 
             _kidClaim = kidClaim;
             _tokenEndpoint = tokenEndpoint;

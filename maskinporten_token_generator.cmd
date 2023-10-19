@@ -2,7 +2,7 @@
 setlocal
 
 cd %~dp0 >NUL
-set MPEXE=%~dp0\src\MaskinportenTokenGenerator\bin\Debug\MaskinportenTokenGenerator.exe
+set MPEXE=%~dp0\src\MaskinportenTokenGenerator\bin\Debug\net6.0-windows\MaskinportenTokenGenerator.exe
 if not exist %MPEXE% (
 	echo %MPEXE% not found. Build it first.
 	pause

@@ -299,7 +299,7 @@ namespace MaskinportenTokenGenerator
         public static string GeneratePkceChallenge(string text)
         {
             byte[] bytes = Encoding.ASCII.GetBytes(text);
-            SHA256Managed hashString = new SHA256Managed();
+            SHA256 hashString = SHA256.Create();
             byte[] hash = hashString.ComputeHash(bytes);
 
             string base64UrlHash = Convert.ToBase64String(hash);

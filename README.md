@@ -3,7 +3,8 @@
 This is a utilty for helping out with generating access_tokens from ID/Maskinporten, supporting integration with Postman for automating retrieval of access_tokens via a local web server.
 
 ## Requirements
-* A recent Windows and Visual Studio 2017 or newer for building
+* Windows 7 or later
+* .NET6 SDK for building
 * Either
 	* A enterprise certificate owned installed owned by the organization that has been given access to one or more scopes in machineporten
 	* A JSON file containing a JWK. Used if the client has been configured with a pre-configured key. See https://mkjwk.org/ for examples on how to construct JWKs. NOTE! As of now only RS256 algorithm is supported.
@@ -11,8 +12,7 @@ This is a utilty for helping out with generating access_tokens from ID/Maskinpor
 * A client id for an integration in Maskinporten provisioned with one or more scopes
 
 ## Building
-Open a Visual Studio 2017 or newer commandline environment, and run `msbuild` in the `src`-directory, or open the solution file and build within Visual Studio.
-
+Open and build in your favourite IDE, or run `dotnet build` 
 ## Usage
 1. Copy `config.cmd` to `config.local.cmd` and configure the production and/or TEST-settings 
 2. Run either of the following utility scripts:
@@ -45,6 +45,7 @@ Here "BearerToken" is an environment variable, which can be put in the "Token"-f
 MIT
 
 ## Changelog (since Sep. 2020)
+* 2023-10-19: Upgrade to net6.0
 * 2023-06-08: Add support for PKCE in person-mode.
 * 2023-06-07: Set new "test" environment as default replacing "ver2".
 * 2022-07-21: Add support for supplying a JWK-file instead of PKCS#12 for self-generated keys
