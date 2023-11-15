@@ -1,0 +1,8 @@
+{
+    "scopes": [
+        "altinn:serviceowner",
+        "altinn:serviceowner/instances.read",
+        "altinn:serviceowner/instances.write",
+        "altinn:serviceowner/notifications.create"
+    ]
+}

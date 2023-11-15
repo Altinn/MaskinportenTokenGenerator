@@ -5,11 +5,14 @@
 # -----------------------------------------------------------------------------------------------------------------
 #
 # Examples: 
-# ./admin.ps1 -Env ver2 -Report        --> Generates a report showing all orgs having access to a scope
-# ./admin.ps1 -Env ver2 -ShowMissing   --> List all serviceowners missing scope access
-# ./admin.ps1 -Env ver2 -ShowExtra     --> List all scopes having orgs with access that are not serviceowners
-# ./admin.ps1 -Env ver2 -AddMissing    --> Grant service owners access to missing scopes, if any
-# ./admin.ps1 -Env ver2 -RemoveExtra   --> Revoke non-service owners access to scopes, if any
+# ./so-admin -Env test -Report        --> Generates a report showing all orgs having access to a scope
+# ./so-admin -Env test -ShowMissing   --> List all serviceowners missing scope access
+# ./so-admin -Env test -ShowExtra     --> List all scopes having orgs with access that are not serviceowners
+# ./so-admin -Env test -AddMissing    --> Grant service owners access to missing scopes, if any
+# ./so-admin -Env test -RemoveExtra   --> Revoke non-service owners access to scopes, if any
+# ./so-admin -Env test -RemoveSingle  --> 
+# ./so-admin -Env test -AddSingle     --> 
+
 
 
 [cmdletbinding()]
@@ -48,7 +51,7 @@ function Generate-Full-Report {
     foreach ($scope in $scopes) {
         Write-Verbose("Getting orgs with access to scope '$scope' ...")
         $orgs = . $ScopeAccess -env $Env -operator get -scope $scope | ForEach-Object { $_.consumer_orgno }
-        $report[$scope] = $orgs        
+        $report[$scope] = $orgs
     }
     $report
 }
@@ -88,7 +91,7 @@ function Generate-Missing-Report {
         Write-Verbose $so
         foreach ($scopeaccess in $report.GetEnumerator()) {
             if ($null -ne $scopeaccess.Value -and $scopeaccess.Value.Contains($so.orgnr)) {
-                Write-Verbose ($so.name.en + " (" + $so.orgnr + ") has access to " + $scopeaccess.Key)                
+                Write-Verbose ($so.name.en + " (" + $so.orgnr + ") has access to " + $scopeaccess.Key)
             } else {
                 Write-Verbose ($so.name.en + " (" + $so.orgnr + ") MISSING access to " + $scopeaccess.Key)
                 $missing += $scopeaccess.Key
@@ -133,20 +136,29 @@ function Add-Single {
     }
  }
 
-
+function Show-Missing {
+    $missingReport = Generate-Missing-Report
+    if (!$missingReport.Keys.Count) {
+        Write-Output "No service owners are found missing scope access"
+    }
+    else {
+        $missingList = @()
+        foreach ($missing in $missingReport.GetEnumerator()) {
+            foreach ($scope in $missing.Value) {
+                Write-Verbose ("Org " + $missing.Key.name.en + " (" + $missing.Key.orgnr + ") missing access to " + $scope)
+                $missingList += [PSCustomObject]@{ "Org" = $missing.Key.orgnr + " (" + $missing.Key.name.en + ")"; "Scope" = $scope }
+            }
+        }
+        $missingList | Sort-Object -Property Org | Format-Table 
+    }
+}
 
 
 if ($Report) {
     Generate-Full-Report 
 }
 elseif ($ShowMissing) {
-    $missingReport = Generate-Missing-Report
-    if (!$missingReport.Keys.Count) {
-        Write-Output "No service owners are found missing scope access"
-    }
-    else {
-        $missingReport 
-    }
+    Show-Missing
 }
 elseif ($ShowExtra) {
     Generate-Extra-Report
