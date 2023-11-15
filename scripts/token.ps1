@@ -27,7 +27,7 @@ function Get-Token {
         Exit 1
     }
 
-    $tgconfig = $PSScriptRoot + "/scopes-admin.config.local.cmd";
+    $tgconfig = $PSScriptRoot + "\scopes-admin.config.local.cmd";
     if (!(Test-Path $tgconfig)) {
         Write-Warning "$tgconfig not found. Copy it from scopes-admin.config.cmd"
         Exit 1

@@ -5,20 +5,19 @@
 # -----------------------------------------------------------------------------------------------------------------
 #
 # Examples: 
-# ./scope.ps1 get -prefix altinn
-# ./scope.ps1 get -scope altinn:foo 
-# ./scope.ps1 new -file definition.json
-# ./scope.ps1 new -definition $definition
-# ./scope.ps1 update -file definition.json
-# ./scope.ps1 update -definition $definition
-# ./scope.ps1 update -definition $definition
-# ./scope.ps1 export-to-csv -prefix altinn
-# ./scope.ps1 import-from-csv -file somefile.csv
-# ./scope.ps1 export-to-json -prefix altinn
+# ./scope get -prefix altinn
+# ./scope get -scope altinn:foo 
+# ./scope new -file definition.json
+# ./scope new -definition $definition
+# ./scope update -file definition.json
+# ./scope update -definition $definition
+# ./scope update -definition $definition
+# ./scope export-to-csv -prefix altinn
+# ./scope import-from-csv -file somefile.csv
+# ./scope export-to-json -prefix altinn
 # 
-# Environment defaults to "VER2". Can be overridden by supplying a -env parameter containing "test1", "ver1", ver2" or "prod"
+# Environment defaults to "test". Can be overridden by supplying a -env parameter containing "test" or "prod"
 # 
-
 
 param (
     [Parameter(Mandatory=$true)][string]$operator,
@@ -26,7 +25,7 @@ param (
     [Parameter()][string]$file,
     [Parameter()][string]$definition,
     [Parameter()][string]$prefix,
-    [Parameter()][string]$env = "ver2"
+    [Parameter()][string]$env = "test"
 )
 
 . ($PSScriptRoot + "/config.ps1")

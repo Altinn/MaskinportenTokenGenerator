@@ -3,6 +3,7 @@
 
 **/*config.local*
 scripts/serviceowners.local.json
+scripts/scopes.local.json
 scripts/exported
 scripts/imported
 secrets

@@ -5,11 +5,12 @@
 # -----------------------------------------------------------------------------------------------------------------
 #
 # Examples: 
-# ./scopeaccess.ps1 get someprefix:somescope                -> Returns a list of organizations with access to someprefix:somescope
-# ./scopeaccess.ps1 getorg 912345678                        -> Returns a list of scopes granted a organizations
-# ./scopeaccess.ps1 get someprefix:somescope 912345678      -> Returns the scope access for a given scope and organization
-# ./scopeaccess.ps1 remove someprefix:somescope 912345678   -> Revoke 912345678 access to someprefix:somescope
-# ./scopeaccess.ps1 add someprefix:somescope 912345678      -> Grant 912345678 access to someprefix:somescope
+# ./scopeaccess get someprefix:somescope                -> Returns a list of organizations with access to someprefix:somescope
+# ./scopeaccess getorg 912345678                        -> Returns a list of scopes granted an organization
+# ./scopeaccess get someprefix:somescope 912345678      -> Returns the scope access for a given scope and organization
+# ./scopeaccess remove someprefix:somescope 912345678   -> Revoke 912345678 access to someprefix:somescope
+# ./scopeaccess add someprefix:somescope 912345678      -> Grant 912345678 access to someprefix:somescope
+# ./scopeaccess listprefix someprefix:somescope         -> List all scopes starting with someprefix:somescope
 # 
 # Environment defaults to "TEST". Can be overridden by supplying a fourth positional or -env parameter containing "test" or "prod"
 
