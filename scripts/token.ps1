@@ -27,18 +27,18 @@ function Get-Token {
         Exit 1
     }
 
-    $tgconfig = $PSScriptRoot + "\scopes-admin.config.local.cmd";
+    $tgconfig = $PSScriptRoot + "/scopes-admin.config.local.ps1";
     if (!(Test-Path $tgconfig)) {
-        Write-Warning "$tgconfig not found. Copy it from scopes-admin.config.cmd"
+        Write-Warning "$tgconfig not found. Copy it from scopes-admin.config.ps1"
         Exit 1
     }
 
-    $token_cache = ".\token.$env.cache"
+    $token_cache = "./token.$env.cache"
 
     if ($CONFIG["AlwaysRefresh"] -eq $True -or !(Test-Path($token_cache)) -or (IsTokenCacheExpired($token_cache))) {
         $cmd =  $CONFIG["TokenGenerator"] + " onlytoken " + $env + " " + $tgconfig
         Write-Verbose "Running: $cmd"
-        Start-Process -FilePath "cmd.exe" -ArgumentList "/c $cmd" -RedirectStandardOutput $token_cache -Wait -WindowStyle Hidden
+        & pwsh -Command $cmd *> $token_cache
     }
     
     $token = Get-Content -Path $token_cache

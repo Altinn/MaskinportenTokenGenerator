@@ -1,4 +1,4 @@
-$validenv = "ver2", "prod", "test"
+$validenv = "prod", "test"
 
 if ($validenv -notcontains $env) {
     Write-Error ("Invalid env supplied. Valid environments: " + $validenv) 
