@@ -3,10 +3,10 @@
 This is a utilty for helping out with generating access_tokens from ID/Maskinporten, supporting integration with Postman for automating retrieval of access_tokens via a local web server.
 
 ## Requirements
-* Windows 7 or later
-* .NET6 SDK for building
+* .NET8 SDK for building
+* Powershell 7
 * Either
-	* A enterprise certificate owned installed owned by the organization that has been given access to one or more scopes in machineporten
+	* A enterprise certificate owned installed owned by the organization that has been given access to one or more scopes in Maskinporten installed in the certificate store (Windows only)
 	* A JSON file containing a JWK. Used if the client has been configured with a pre-configured key. See https://mkjwk.org/ for examples on how to construct JWKs. NOTE! As of now only RS256 algorithm is supported.
 	* A password-protected PKCS#12 file containing the public/private key pair. Can also be used if the client has been configured with a pre-configured key.	
 * A client id for an integration in Maskinporten provisioned with one or more scopes
@@ -14,12 +14,12 @@ This is a utilty for helping out with generating access_tokens from ID/Maskinpor
 ## Building
 Open and build in your favourite IDE, or run `dotnet build` 
 ## Usage
-1. Copy `config.cmd` to `config.local.cmd` and configure the production and/or TEST-settings 
+1. Copy `config.ps1` to `config.local.ps1` and configure the production and/or TEST-settings 
 2. Run either of the following utility scripts:
 	* `get_${env}_token` Gets a access_token and places it on the clipboard (for easy pasting in Postman etc)
 	* `start_${env}_token_server` Starts a simple HTTP-server listening on all interfaces on port 17823 by default. Any GET-request to `http://localhost:17823` will attempt to fetch a access_token from Maskinporten and proxy the response.
 
-You can keep multiple configuration files for various settings, and can pass those as a single parameter to the scripts, like `start_test_token_server config.local.my-custom-config.cmd` 
+You can keep multiple configuration files for various settings, and can pass those as a single parameter to the scripts, like `start_test_token_server config.local.my-custom-config.ps1` 
 
 This can also be done by dragging and dropping the custom config-file over the script you want to run.
 
@@ -45,7 +45,8 @@ Here "BearerToken" is an environment variable, which can be put in the "Token"-f
 MIT
 
 ## Changelog (since Sep. 2020)
-* 2023-10-19: Upgrade to net6.0
+* 2024-02-07: Port to net8.0 (cross platform), and convert batch scripts to Powershell
+* 2023-10-19: Upgrade to net6.0-windows
 * 2023-06-08: Add support for PKCE in person-mode.
 * 2023-06-07: Set new "test" environment as default replacing "ver2".
 * 2022-07-21: Add support for supplying a JWK-file instead of PKCS#12 for self-generated keys

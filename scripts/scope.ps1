@@ -1,7 +1,7 @@
 # Script to administrate scopes defined in ID/Maskinporten
 # Author: bdl@digdir.no
 # -----------------------------------------------------------------------------------------------------------------
-# NOTE! Requires a "scopes-admin.config.local.cmd" file present in same directory as script.
+# NOTE! Requires a "scopes-admin.config.local.ps1" file present in same directory as script.
 # -----------------------------------------------------------------------------------------------------------------
 #
 # Examples: 

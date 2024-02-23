@@ -7,7 +7,7 @@ This directory contains scripts that can be useful for performing/automating var
 
 ## Setup
 
-Copy `scopes-admin-config.cmd` to `scopes-admin-config.local.cmd` and fill in credentials for a Maskinporten- client with `idporten:scopes.write` scope.
+Copy `scopes-admin-config.ps1` to `scopes-admin-config.local.ps1` and fill in credentials for a Maskinporten- client with `idporten:scopes.write` scope.
 
 ## Administrating scopes
 

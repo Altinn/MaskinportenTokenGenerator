@@ -1,15 +1,14 @@
 ﻿using System;
 using System.Linq;
 using System.Net;
+using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
-using System.Windows.Forms;
 using Mono.Options;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-
 
 namespace MaskinportenTokenGenerator
 {
@@ -42,9 +41,9 @@ namespace MaskinportenTokenGenerator
             var useCurrentUserStoreLocation = false;
 
             var p = new OptionSet() {
-                { "t=|certificate_thumbprint=", "Thumbprint for certificate to use, see Cert:\\{LocalMachine,CurrentUser}\\My in Powershell.",
+                { "t=|certificate_thumbprint=", "(Windows only) Thumbprint for certificate to use, see Cert:\\{LocalMachine,CurrentUser}\\My in Powershell.",
                     v => _certificateThumbPrint = v },
-                { "u=|use_current_user_store_location=", "User CurrentUser certificate store location (default: LocalMachine)", 
+                { "u=|use_current_user_store_location=", "(Windows only) User CurrentUser certificate store location (default: LocalMachine)",
                     v => useCurrentUserStoreLocation = v != null && v == "true" },
                 { "k=|keystore_path=", "Path to PKCS12 file containing certificate to use.",
                     v => _p12KeyStoreFile = v },
@@ -122,6 +121,13 @@ namespace MaskinportenTokenGenerator
             TokenHandler tokenHandler;
             try {
                 if (_certificateThumbPrint != null) {
+
+                    if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                    {
+                        Console.WriteLine("Error: --certificate_thumbprint is only supported on Windows");
+                        Environment.Exit(1);
+                    }
+
                     var storeLocation = useCurrentUserStoreLocation ? StoreLocation.CurrentUser : StoreLocation.LocalMachine;
                     tokenHandler = new TokenHandler(_certificateThumbPrint, storeLocation, _kidClaim, _tokenEndpoint, _audience, _resource, _scopes, _issuer, _tokenTtl, _consumerOrg);
                 }
@@ -160,9 +166,8 @@ namespace MaskinportenTokenGenerator
                 if (isError)
                 {
                     Console.WriteLine("Failed getting token: " + token);
-                    Console.WriteLine("Call made (formatted as curl command, also placed in clipboard):");
+                    Console.WriteLine("Call made (formatted as curl command):");
                     Console.WriteLine(tokenHandler.CurlDebugCommand);
-                    Clipboard.SetText(tokenHandler.CurlDebugCommand);
                 }
                 else
                 {
@@ -173,12 +178,10 @@ namespace MaskinportenTokenGenerator
                         Environment.Exit(0);
                     }
 
-                    Clipboard.SetText(tokenObject.Property("access_token").Value.ToString());
                     Console.WriteLine("Got successful response:");
                     Console.WriteLine("----------------------------------------");
                     Console.WriteLine(token);
                     Console.WriteLine("----------------------------------------");
-                    Console.WriteLine("Access token has been copied to clipboard.");
                 }
 
                 if (!onlyToken) {
@@ -224,7 +227,7 @@ namespace MaskinportenTokenGenerator
 
         static void ShowHelp(OptionSet p)
         {
-            Console.WriteLine("Usage: MaskinportenTokenGenerator.exe [OPTIONS]");
+            Console.WriteLine("Usage: MaskinportenTokenGenerator [OPTIONS]");
             Console.WriteLine("Generates as JWT Bearer Grant and uses it against Maskinporten/ID-porten to get tokens.");
             Console.WriteLine();
             Console.WriteLine("Options:");
