@@ -3,6 +3,7 @@
         "altinn:serviceowner",
         "altinn:serviceowner/instances.read",
         "altinn:serviceowner/instances.write",
-        "altinn:serviceowner/notifications.create"
+        "altinn:serviceowner/notifications.create",
+        "altinn:events.publish"
     ]
 }
