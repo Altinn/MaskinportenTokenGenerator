@@ -2,7 +2,7 @@
 $PSScriptRoot = Split-Path $MyInvocation.MyCommand.Path -Parent
 Set-Location $PSScriptRoot
 
-$MPEXE = Join-Path $PSScriptRoot "src\MaskinportenTokenGenerator\bin\Debug\net8.0\MaskinportenTokenGenerator"
+$MPEXE = Join-Path $PSScriptRoot "src\MaskinportenTokenGenerator\bin\Debug\net8.0\MaskinportenTokenGenerator.exe"
 if (-not (Test-Path $MPEXE)) {
     Write-Host "$MPEXE not found. Build it first."
     Pause
@@ -110,9 +110,7 @@ if ($args[1] -eq "prod") {
     $certificate_thumbprint = $production_certificate_thumbprint
     $keystore_path = $production_keystore_path
     $keystore_password = $production_keystore_password
-    $jwk_path = $production_j
-
-wk_path
+    $jwk_path = $production_jwk_path
     $kid = $production_kid
     $client_id = $production_client_id
     $resource = $production_resource

@@ -17,7 +17,15 @@ $production_scopes = "idporten:scopes.write"
 # --------- TETS SETTINGS -----------
 # The path to a PKCS#12 file containing a certificate used to sign the request
 $test_keystore_path = "somepathto/keystore-test.p12"
+
+# Password to the key store
 $test_keystore_password = "somepassword"
+
+# If authenticating with a pre-registered key (private_key_jwt), a kid must be supplied
 $test_kid = "somekid"
+
+# The client_id that you have provisioned with the scopes you want
 $test_client_id = "someclientid"
+
+# The scopes you want in your access token
 $test_scopes = "idporten:scopes.write"
