@@ -119,8 +119,8 @@ if ($args[1] -eq "prod") {
     $token_endpoint = $production_token_endpoint
     $authorize_endpoint = $production_authorize_endpoint
     $person_mode = $production_person_mode
-    $consumer_org = $prod_consumer_org
-    $use_current_user_store_location = $prod_use_current_user_store_location
+    $consumer_org = $production_consumer_org
+    $use_current_user_store_location = $production_use_current_user_store_location
 }
 
 $resource_opt = if ($resource) { "--resource=$resource" } else { $null }
