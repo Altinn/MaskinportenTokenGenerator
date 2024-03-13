@@ -36,6 +36,10 @@ if ([string]::IsNullOrEmpty($args[2])) {
 
 . .\config.ps1
 if (Test-Path $local_config) {
+    if (-not [System.IO.Path]::IsPathRooted($local_config)) {
+        $local_config = "./$local_config"
+    }
+
     . $local_config
 }
 
