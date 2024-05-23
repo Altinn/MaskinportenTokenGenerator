@@ -14,7 +14,7 @@ Copy `scopes-admin-config.ps1` to `scopes-admin-config.local.ps1` and fill in cr
 See `scope.ps1` for usage examples. Typical flow is:
 
 1. Export all scopes definitions from Maskinporten to CSV, eg.:
-   `./scope.ps1 export-to-csv -prefix altinn -Env ver2`
+   `./scope.ps1 export-to-csv -prefix altinn -Env test`
 
 2. Edit the CSV to your liking:
 

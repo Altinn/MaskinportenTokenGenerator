@@ -6,15 +6,10 @@ if ($validenv -notcontains $env) {
 }
 
 if ($env -eq "prod") {
-    $envurl = "https://integrasjon.difi.no"
+    $envurl = "https://api.samarbeid.digdir.no"
 }
 else {
-    if ($validenv -eq "test") {
-        $envurl = "https://integrasjon-ver2.difi.no"    
-    }
-    else {
-        $envurl = "https://integrasjon-$env.difi.no"
-    }
+    $envurl = "https://api.test.samarbeid.digdir.no"
 }
 
 #$envurl = "http://localhost:8000"

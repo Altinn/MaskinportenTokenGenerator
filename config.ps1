@@ -63,11 +63,6 @@ $test_authorize_endpoint = "https://login.test.idporten.no/authorize"
 $test_person_mode = "false"
 $test_consumer_org = ""
 
-# For legacy test (VER2) environments, use:
-#$test_audience=https://ver2.maskinporten.no/
-#$test_token_endpoint=https://ver2.maskinporten.no/token
-#$test_authorize_endpoint=https://oidc-ver2.difi.no/idporten-oidc-provider/authorize
-
 # --------- DEV SETTINGS. This is only for internal/experimental use, you probably want TEST -----------
 $dev_certificate_thumbprint = ""
 #$dev_use_current_user_store_location=true
