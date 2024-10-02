@@ -2,7 +2,7 @@
 $PSScriptRoot = Split-Path $MyInvocation.MyCommand.Path -Parent
 Set-Location $PSScriptRoot
 
-$MPEXE = Join-Path $PSScriptRoot "src\MaskinportenTokenGenerator\bin\Debug\net8.0\MaskinportenTokenGenerator.exe"
+$MPEXE = Join-Path $PSScriptRoot "src\MaskinportenTokenGenerator\bin\Debug\net8.0\MaskinportenTokenGenerator.dll"
 if (-not (Test-Path $MPEXE)) {
     Write-Host "$MPEXE not found. Build it first."
     Pause
@@ -136,7 +136,7 @@ $person_mode_opt = if ($person_mode) { "--person_mode=$person_mode" } else { $nu
 $consumer_org_opt = if ($consumer_org) { "--consumer_org=$consumer_org" } else { $null }
 $use_current_user_store_location_opt = if ($use_current_user_store_location) { "--use_current_user_store_location=$use_current_user_store_location" } else { $null }
 
-$cmd = "$MPEXE --client_id=$client_id --audience=$audience --token_endpoint=$token_endpoint --authorize_endpoint=$authorize_endpoint --scopes=$scopes $only_token_opt $person_mode_opt $server_mode_opt $resource_opt $certificate_thumbprint_opt $keystore_opt $jwk_path_opt $kid_opt $consumer_org_opt $use_current_user_store_location_opt"
+$cmd = "dotnet $MPEXE --client_id=$client_id --audience=$audience --token_endpoint=$token_endpoint --authorize_endpoint=$authorize_endpoint --scopes=$scopes $only_token_opt $person_mode_opt $server_mode_opt $resource_opt $certificate_thumbprint_opt $keystore_opt $jwk_path_opt $kid_opt $consumer_org_opt $use_current_user_store_location_opt"
 if (-not $only_token_opt) {
     Write-Host "-------------------------------"
     Write-Host $cmd
